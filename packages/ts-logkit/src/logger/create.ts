@@ -36,7 +36,7 @@ export function createLogger(opts: LoggerOptions) {
   }
 
   return {
-    trace: (msg: string, ctx?: object) =>
+    trace: (msg: string, ctx?: Record<string, unknown>) =>
       emit({
         level: "trace",
         message: msg,
@@ -44,7 +44,7 @@ export function createLogger(opts: LoggerOptions) {
         timestamp: Date.now(),
       }),
 
-    debug: (msg: string, ctx?: object) =>
+    debug: (msg: string, ctx?: Record<string, unknown>) =>
       emit({
         level: "debug",
         message: msg,
@@ -52,7 +52,7 @@ export function createLogger(opts: LoggerOptions) {
         timestamp: Date.now(),
       }),
 
-    info: (msg: string, ctx?: object) =>
+    info: (msg: string, ctx?: Record<string, unknown>) =>
       emit({
         level: "info",
         message: msg,
@@ -60,7 +60,7 @@ export function createLogger(opts: LoggerOptions) {
         timestamp: Date.now(),
       }),
 
-    warn: (msg: string, ctx?: object) =>
+    warn: (msg: string, ctx?: Record<string, unknown>) =>
       emit({
         level: "warn",
         message: msg,
@@ -68,7 +68,7 @@ export function createLogger(opts: LoggerOptions) {
         timestamp: Date.now(),
       }),
 
-    error: (msg: string, err?: Error, ctx?: object) =>
+    error: (msg: string, err?: Error, ctx?: Record<string, unknown>) =>
       emit({
         level: "error",
         message: msg,
@@ -77,7 +77,7 @@ export function createLogger(opts: LoggerOptions) {
         timestamp: Date.now(),
       }),
 
-    fatal: (msg: string, err?: Error, ctx?: object) =>
+    fatal: (msg: string, err?: Error, ctx?: Record<string, unknown>) =>
       emit({
         level: "fatal",
         message: msg,

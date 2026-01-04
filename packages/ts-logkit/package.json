@@ -1,6 +1,7 @@
 {
-  "name": "ts-logkit",
+  "name": "@buchanan-solutions/ts-logkit",
   "version": "0.0.1",
+  "type": "module",
   "description": "Composable TypeScript logging toolkit with hooks and transports",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -17,9 +18,11 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts --watch",
+    "dev": "tsup src/index.ts --watch --dts --format cjs,esm",
     "lint": "echo \"todo\"",
-    "test": "echo \"todo\""
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:verbose": "vitest run --reporter verbose --globals"
   },
   "license": "MIT",
   "devDependencies": {
