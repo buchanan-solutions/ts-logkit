@@ -3,10 +3,23 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "pnpm --filter ts-logkit test",
+    "test:verbose": "pnpm --filter ts-logkit test:verbose",
+    "build": "pnpm --filter ts-logkit build",
+    "watch": "pnpm chokidar \"packages/ts-logkit/**/*\" -i \"packages/ts-logkit/dist/**\" -c \"pnpm build\""
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "description": ""
+  "license": "MIT",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "chokidar-cli": "^3.0.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3",
+    "vite-tsconfig-paths": "^6.0.3",
+    "vitest": "^1.2.0"
+  },
+  "packageManager": "pnpm@8.15.0"
 }

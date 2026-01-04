@@ -26,7 +26,7 @@
 
 ### Changed
 
--
+- Simplified error handling: removed any verbose error or error verbosity features to keep the API simple and put the responsibility of what to log on the user
 
 ### Breaking
 
