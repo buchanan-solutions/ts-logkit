@@ -4,9 +4,7 @@ This repo is a **pnpm monorepo** containing the core SDK and framework-specific 
 
 ---
 
-## Packages
-
-### `@buchanan-solutions/ts-logkit`
+## `@buchanan-solutions/ts-logkit`
 
 The **core, framework-agnostic TypeScript logging SDK**.
 
@@ -16,22 +14,22 @@ Its goal is to **empower developers to add structured, consistent, and extensibl
 
 ---
 
-## Key Features
+### Key Features
 
-### 1. **Structured Logger Instances**
+#### 1. **Structured Logger Instances**
 
 - Named loggers (`name`) with optional type categorization (`type`).
 - Per-logger log levels with numeric precedence for flexible filtering.
 - Context-aware logging: all log methods accept optional context objects.
 - Fully typed TypeScript interface for safety (`LogLevel`, `LogEvent`, `LogTransport`, `LogHook`).
 
-### 2. **Rich Log Levels**
+#### 2. **Rich Log Levels**
 
 - Core levels: `trace`, `debug`, `info`, `warn`, `error`, `fatal`.
 - Extended levels for clarity and semantic tracking: `success`, `start`.
 - Automatic filtering based on current logger or module-level log levels.
 
-### 3. **Pluggable Transport Interface**
+#### 3. **Pluggable Transport Interface**
 
 - Define multiple output destinations via `LogTransport`:
 
@@ -43,7 +41,7 @@ Its goal is to **empower developers to add structured, consistent, and extensibl
 - Each transport decides how to render or persist log events.
 - Supports synchronous or asynchronous transports for safe fanout.
 
-### 4. **Hook-Based Extensions**
+#### 4. **Hook-Based Extensions**
 
 - `LogHook` interface for side effects such as:
 
@@ -54,7 +52,7 @@ Its goal is to **empower developers to add structured, consistent, and extensibl
 - Hooks are async-capable, fail-safe, and non-blocking.
 - Multiple hooks can be attached per logger or per transport.
 
-### 5. **Central Logger Registry**
+#### 5. **Central Logger Registry**
 
 - Tracks logger instances at runtime for:
 
@@ -65,14 +63,14 @@ Its goal is to **empower developers to add structured, consistent, and extensibl
 - Framework-agnostic: registry logic lives entirely in core.
 - Compatible with **adapters** that persist configuration (e.g., localStorage for Next.js clients).
 
-### 6. **Development-Mode Features**
+#### 6. **Development-Mode Features**
 
 - ANSI-colored console output for clear, readable logs in terminals.
 - Optional trace logs that include caller context.
 - Extensible formatter layer for customizing message layouts and colors.
 - Supports browser-safe formatting for client-side logs.
 
-### 7. **Future-Proof Architecture**
+#### 7. **Future-Proof Architecture**
 
 - Clear separation of **core logging** vs **framework-specific adapters**.
 - Extensible configuration provider interface for storage backends:
@@ -91,7 +89,7 @@ Its goal is to **empower developers to add structured, consistent, and extensibl
 
 ---
 
-## Responsibilities of `ts-logkit` Core
+### Responsibilities of `ts-logkit` Core
 
 1. Provide a **stable, fully typed logging API** for developers.
 2. Manage a **central, framework-agnostic registry** of logger instances.
@@ -101,7 +99,7 @@ Its goal is to **empower developers to add structured, consistent, and extensibl
 
 ---
 
-## Intended Usage
+### Intended Usage
 
 `ts-logkit` is intended to be used in:
 
@@ -137,3 +135,9 @@ logger.error("Failed to fetch data", { url, retries });
 - **Centralized Control**: Central registry allows runtime adjustments without touching individual logger instances.
 - **Minimal Core Overhead**: No storage, network, or external dependency assumptions.
 - **Future-Ready**: Supports modern TypeScript workflows and upcoming framework adapters.
+
+Notes:
+
+- Loggers will default to "warn" cause that is my preference lol
+  - Warn is nice cause they shoulnd't happen often and foreces info or debug levels to be explicit (keeps logging quiet by default)
+-

@@ -1,4 +1,4 @@
-import { LogEvent } from "../types";
+import { Event, Formatter, FormattedOutput } from "../types";
 
 const COLORS = {
   trace: "\x1b[90m",
@@ -11,7 +11,7 @@ const COLORS = {
 
 const RESET = "\x1b[0m";
 
-export function formatDev(event: LogEvent): string {
+export function formatDev(event: Event): string {
   const color = COLORS[event.level];
   const time = new Date(event.timestamp).toISOString();
 
@@ -21,4 +21,14 @@ export function formatDev(event: LogEvent): string {
     (event.context ? ` ${JSON.stringify(event.context)}` : "") +
     (event.error ? `\n${event.error.stack}` : "")
   );
+}
+
+/**
+ * Development formatter for Node.js environments
+ * Uses ANSI color codes for terminal output
+ */
+export class DevFormatter implements Formatter {
+  format(event: Event): FormattedOutput {
+    return formatDev(event);
+  }
 }

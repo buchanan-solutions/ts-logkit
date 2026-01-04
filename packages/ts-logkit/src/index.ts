@@ -1,3 +1,4 @@
-export { createLogger } from "./logger/create";
-export { createConsoleTransport } from "./transports/console";
+export { Logger } from "./logger";
+export * from "./transports";
+export * from "./formatters";
 export * from "./types";
