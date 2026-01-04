@@ -1,0 +1,33 @@
+# ts-logkit
+
+## 0.0.0
+
+### Added
+
+- Initial release
+- Core logger (`createLogger`) with configurable log level filtering
+- Six log levels: trace, debug, info, warn, error, fatal
+- Pluggable transport interface (`LogTransport`)
+- Hook-based log fanout (`LogHook`) with async support
+- Console transport (`createConsoleTransport`) with development formatter
+- Colored development console output with ANSI color codes
+- Context support: all log methods accept optional context objects
+- Error handling: `error` and `fatal` methods accept optional `Error` objects
+- Automatic timestamp generation for all log events
+- TypeScript type definitions exported (`LogLevel`, `LogEvent`, `LogTransport`, `LogHook`)
+
+---
+
+## 0.0.1
+
+### Added
+
+-
+
+### Changed
+
+-
+
+### Breaking
+
+-

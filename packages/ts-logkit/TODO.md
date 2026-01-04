@@ -1,0 +1,1 @@
+- [] Scrap anything related to "verbose errors" or "error verbosity", the logging API should be as simpmle as possible and should put the responsablity of waht to log on the user
