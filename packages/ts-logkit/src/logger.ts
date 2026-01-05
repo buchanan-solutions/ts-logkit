@@ -42,6 +42,14 @@ export class Logger {
     }
   }
 
+  get id(): string {
+    return this._id;
+  }
+
+  public setLevel(level: Level): void {
+    this._minLevel = level;
+  }
+
   /**
    * Apply configuration from store (async)
    * Store only contains serializable data (level), not runtime objects

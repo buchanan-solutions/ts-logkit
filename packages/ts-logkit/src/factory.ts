@@ -1,5 +1,6 @@
 // ./packages/ts-logkit/src/factory.ts
 import { Logger } from "./logger";
+import { Registry } from "./registry";
 import { Config } from "./types/config";
 import { Store } from "./types/store";
 
@@ -9,6 +10,7 @@ import { Store } from "./types/store";
 export type FactoryConfig = Omit<Config, "id"> & {
   /** Optional store for dynamic level configuration updates */
   store?: Store;
+  registry?: Registry;
 };
 
 /**
@@ -39,13 +41,18 @@ export interface LoggerFactory {
  * ```
  */
 export function createLoggerFactory(config: FactoryConfig): LoggerFactory {
-  const { store, ...runtimeConfig } = config;
+  const { store, registry, ...runtimeConfig } = config;
+
+  if (store) {
+    registry?.attachStore(store);
+  }
+
   return {
     createLogger: (
       id: string,
       overrides?: { level?: Config["level"]; type?: Config["type"] }
     ): Logger => {
-      return new Logger(
+      const logger = new Logger(
         {
           id,
           ...runtimeConfig,
@@ -53,6 +60,8 @@ export function createLoggerFactory(config: FactoryConfig): LoggerFactory {
         },
         store
       );
+      registry?.register(logger);
+      return logger;
     },
   };
 }

@@ -38,4 +38,11 @@ export interface Store {
     name: string,
     callback: (config: LoggerStoreConfig) => void
   ): () => void;
+
+  /**
+   * Subscribe to changes for all loggers' configs
+   * @param callback - Function called when the config changes
+   * @returns Unsubscribe function to stop listening to changes
+   */
+  subscribeAll?(callback: (config: LoggerStoreConfig) => void): () => void;
 }
