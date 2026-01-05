@@ -43,10 +43,18 @@
 
 - global disable (via env var or `src/global.ts` functions)
 - noop logger
+- Logger factory system (`createLoggerFactory`) for creating multiple loggers with shared configuration
+- Store system for dynamic logger configuration management
+  - `Store` interface for persisting and retrieving logger configurations
+  - `InMemoryStore` implementation for in-memory storage
+  - Logger instances can subscribe to store updates for runtime level changes
+  - Stores only contain serializable data (level), not runtime objects (transports, formatters, hooks)
+- `destroy()` method on Logger for cleanup of store subscriptions
 
 ### Changed
 
--
+- Development formatter no longer includes timestamp in output (time display removed)
+- Logger constructor now accepts optional `store` parameter for dynamic configuration
 
 ### Breaking
 

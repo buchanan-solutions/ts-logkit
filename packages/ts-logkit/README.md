@@ -20,6 +20,8 @@ It favors **clarity, explicitness, and extensibility** over hidden magic, making
   - [Pluggable Transports](#pluggable-transports)
   - [Formatter Layer](#formatter-layer)
   - [Hook System (Side Effects)](#hook-system-side-effects)
+  - [Logger Factory](#logger-factory)
+  - [Store System](#store-system)
   - [Environment-Safe by Design](#environment-safe-by-design)
 - [Design Principles](#-design-principles)
 - [Quick Start](#-quick-start)
@@ -31,10 +33,14 @@ It favors **clarity, explicitness, and extensibility** over hidden magic, making
   - [Formatter](#formatter)
   - [Transport](#transport)
   - [Hook](#hook)
+  - [Factory](#factory)
+  - [Store](#store)
 - [Architecture Overview](#-architecture-overview)
 - [Environment Support](#-environment-support)
 - [Advanced Usage](#-advanced-usage)
   - [Disabling Logging via Environment Variables](#disabling-logging-via-environment-variables)
+  - [Logger Factory](#logger-factory-1)
+  - [Store System for Dynamic Configuration](#store-system-for-dynamic-configuration)
   - [Multiple Transports](#multiple-transports)
   - [Custom Formatter](#custom-formatter)
   - [Hooks for Telemetry](#hooks-for-telemetry)
@@ -62,6 +68,8 @@ A **minimal, typed logging core** built around a small set of explicit concepts:
 - 🎨 Formatters
 - 🚚 Transports
 - 🪝 Hooks
+- 🏭 Factories
+- 💾 Stores
 
 The core is intentionally **framework-agnostic** and **side-effect free by default**.
 
@@ -167,6 +175,29 @@ Use hooks for:
 - 📝 Audit trails
 
 Hooks support async execution and **never block logging**.
+
+---
+
+### Logger Factory
+
+Create multiple loggers with shared configuration:
+
+- 🏭 Centralized transport, formatter, and hook setup
+- 🔄 Consistent configuration across loggers
+- 📊 Optional store integration for dynamic updates
+
+---
+
+### Store System
+
+Dynamic logger configuration management:
+
+- 🔄 Runtime log level updates without restart
+- 💾 Persistence of logger configurations
+- 📡 Optional subscription-based real-time updates
+- 🔌 Pluggable store implementations (in-memory, localStorage, Redis, etc.)
+
+Stores only contain serializable data (`id`, `level`); runtime objects remain runtime-only.
 
 ---
 
@@ -304,6 +335,55 @@ Hook failures are isolated and never interrupt logging.
 
 ---
 
+### Factory
+
+A `LoggerFactory` creates multiple loggers with shared configuration.
+
+```ts
+interface LoggerFactory {
+  createLogger(
+    id: string,
+    overrides?: { level?: Level; type?: string }
+  ): Logger;
+}
+```
+
+Factories enable:
+
+- 🏭 Creating loggers with consistent transports, formatters, and hooks
+- 📊 Centralized configuration management
+- 🔄 Optional store integration for dynamic level updates
+
+---
+
+### Store
+
+A `Store` manages logger configurations for dynamic runtime updates.
+
+```ts
+interface Store {
+  list(): Promise<SystemConfig>;
+  setAll(configs: SystemConfig): Promise<void>;
+  get(name: string): Promise<LoggerStoreConfig>;
+  set(config: LoggerStoreConfig): Promise<void>;
+  subscribe?(
+    name: string,
+    callback: (config: LoggerStoreConfig) => void
+  ): () => void;
+}
+```
+
+Stores enable:
+
+- 🔄 Runtime log level changes without restarting
+- 💾 Persistence of logger configurations
+- 📡 Remote configuration updates (via custom store implementations)
+- 🔌 Optional subscription-based updates
+
+**Important:** Stores only contain serializable data (logger `id` and `level`). Runtime objects like transports, formatters, and hooks are not stored and remain runtime-only.
+
+---
+
 ## 🏛️ Architecture Overview
 
 High-level flow:
@@ -416,6 +496,128 @@ const currentLevel = Global.getLogLevel();
 
 ---
 
+### Logger Factory
+
+Use a factory to create multiple loggers with shared configuration:
+
+```ts
+import {
+  createLoggerFactory,
+  createConsoleTransport,
+  DevFormatter,
+  InMemoryStore,
+} from "@buchanan-solutions/ts-logkit";
+
+const store = new InMemoryStore();
+
+const factory = createLoggerFactory({
+  transports: [createConsoleTransport()],
+  formatter: new DevFormatter(),
+  level: "info",
+  store, // Optional: enables dynamic level updates
+});
+
+// Create loggers with shared config
+const apiLogger = factory.createLogger("api");
+const dbLogger = factory.createLogger("database", { level: "debug" });
+const authLogger = factory.createLogger("auth", { type: "security" });
+```
+
+**Benefits:**
+
+- Consistent configuration across loggers
+- Centralized transport/formatter/hook management
+- Easy to create many loggers with similar setup
+
+---
+
+### Store System for Dynamic Configuration
+
+Stores enable runtime log level changes without restarting your application:
+
+```ts
+import {
+  Logger,
+  createConsoleTransport,
+  DevFormatter,
+  InMemoryStore,
+} from "@buchanan-solutions/ts-logkit";
+
+// Create a store
+const store = new InMemoryStore();
+
+// Create logger with store
+const logger = new Logger(
+  {
+    id: "my-service",
+    level: "warn",
+    transports: [createConsoleTransport()],
+    formatter: new DevFormatter(),
+  },
+  store // Pass store to enable dynamic updates
+);
+
+// Later, update log level dynamically
+await store.set({ id: "my-service", level: "debug" });
+// Logger automatically updates its level if store supports subscriptions
+
+// Or update all loggers at once
+await store.setAll([
+  { id: "my-service", level: "debug" },
+  { id: "another-service", level: "info" },
+]);
+```
+
+**Store Features:**
+
+- **Serializable only:** Stores only persist `id` and `level` (no functions/objects)
+- **Optional subscriptions:** Stores can implement `subscribe()` for real-time updates
+- **Persistence ready:** Implement custom stores for localStorage, Redis, databases, etc.
+- **Runtime-safe:** Store failures never break logging
+
+**Creating Custom Stores:**
+
+```ts
+import {
+  Store,
+  LoggerStoreConfig,
+  SystemConfig,
+} from "@buchanan-solutions/ts-logkit";
+
+class LocalStorageStore implements Store {
+  private key = "ts-logkit-config";
+
+  async list(): Promise<SystemConfig> {
+    const data = localStorage.getItem(this.key);
+    return data ? JSON.parse(data) : [];
+  }
+
+  async setAll(configs: SystemConfig): Promise<void> {
+    localStorage.setItem(this.key, JSON.stringify(configs));
+  }
+
+  async get(name: string): Promise<LoggerStoreConfig> {
+    const configs = await this.list();
+    const config = configs.find((c) => c.id === name);
+    if (!config) throw new Error(`Logger ${name} not found`);
+    return config;
+  }
+
+  async set(config: LoggerStoreConfig): Promise<void> {
+    const configs = await this.list();
+    const index = configs.findIndex((c) => c.id === config.id);
+    if (index >= 0) {
+      configs[index] = config;
+    } else {
+      configs.push(config);
+    }
+    await this.setAll(configs);
+  }
+}
+```
+
+---
+
 ### Multiple Transports
 
 ```ts
@@ -456,9 +658,9 @@ const hook = {
 
 Planned additions (non-breaking):
 
-- 📋 Logger registry & runtime level overrides
+- 📋 Logger registry (store system provides runtime level overrides ✅)
 - ⚡ Next.js adapter
-- 💾 Persistence providers (localStorage, Redis)
+- 💾 Additional persistence providers (localStorage, Redis) - store interface ready, implementations coming
 - 🌐 Remote telemetry transport
 - 🛠️ Devtools integration
 
