@@ -6,7 +6,7 @@ export type SystemConfig = Config[];
 /**
  * Interface for storage of logger configs
  */
-export interface ILoggingStorage {
+export interface Store {
   /** Get the full system logging configuration (all loggers) */
   list(): Promise<SystemConfig>;
 
