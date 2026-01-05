@@ -1,5 +1,5 @@
 // src/init.ts
-import Global from "./global";
+import { Global } from "./global";
 import { Level } from "./types";
 import { LEVELS } from "./types/level";
 
@@ -49,10 +49,10 @@ function readEnvLevel(): Level | undefined {
 
 // Apply global toggle
 const envEnabled = readEnvFlag();
-if (envEnabled !== undefined) Global.setLoggingEnabled(envEnabled);
+if (envEnabled !== undefined) Global.enabled = envEnabled;
 
 // Apply global log level
 const envLevel = readEnvLevel();
 if (envLevel !== undefined) {
-  Global.setLogLevel(envLevel);
+  Global.level = envLevel;
 }

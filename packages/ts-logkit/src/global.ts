@@ -1,46 +1,30 @@
-import { Level } from "./types";
+import { Level, LEVELS } from "./types";
 
-let enabled = true;
+export class Global {
+  private static _enabled = true;
+  private static _level: Level = "trace";
 
-/**
- * Global minimum log level defaults to 'trace' to ensure all logs are emitted.
- *
- * This can be overridden by the user via `setLogLevel`.
- */
-let level: Level = "trace";
-
-/**
- * Global logging configuration class with static methods
- * for controlling logging behavior across all logger instances.
- */
-class Global {
-  /**
-   * Disable or enable logging globally (runtime)
-   */
-  static setLoggingEnabled(value: boolean): void {
-    enabled = value;
+  /** Enable / disable logging globally */
+  static get enabled(): boolean {
+    return Global._enabled;
   }
 
-  /**
-   * Check if logging is currently enabled globally
-   */
-  static isLoggingEnabled(): boolean {
-    return enabled;
+  static set enabled(value: boolean) {
+    Global._enabled = value;
   }
 
-  /**
-   * Set the global minimum log level
-   */
-  static setLogLevel(value: Level): void {
-    level = value;
+  /** Global minimum log level */
+  static get level(): Level {
+    return Global._level;
   }
 
-  /**
-   * Get the current global minimum log level
-   */
-  static getLogLevel(): Level {
-    return level;
+  static set level(value: Level) {
+    if (!LEVELS.includes(value)) {
+      console.warn(
+        `[ts-logkit] Invalid log level in Global.level=("${value}"), ignoring.`
+      );
+      return;
+    }
+    Global._level = value;
   }
 }
-
-export default Global;

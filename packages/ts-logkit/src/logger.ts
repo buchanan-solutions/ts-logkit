@@ -6,7 +6,7 @@ import { Formatter } from "./types/formatter";
 import { Config } from "./types/config";
 import { Store } from "./types/store";
 import { splitError } from "./utils/splitError";
-import Global from "./global";
+import { Global } from "./global";
 import { LEVELS } from "./types/level";
 
 export class Logger {
@@ -72,8 +72,7 @@ export class Logger {
   private shouldLog(level: Level) {
     const loggerIndex = LEVELS.indexOf(level);
     const minLoggerIndex = LEVELS.indexOf(this._minLevel);
-    const globalLevel = Global.getLogLevel();
-    const minGlobalIndex = LEVELS.indexOf(globalLevel);
+    const minGlobalIndex = LEVELS.indexOf(Global.level);
 
     // Only log if level >= both logger minLevel AND global minLevel
     // Both conditions must be true - check each explicitly
@@ -83,7 +82,7 @@ export class Logger {
   }
 
   private async emit(event: Event) {
-    if (!Global.isLoggingEnabled()) return;
+    if (!Global.enabled) return;
     if (!this.shouldLog(event.level)) return;
 
     // Send the full event to all transports
