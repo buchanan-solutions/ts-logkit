@@ -36,3 +36,18 @@
 
 - removed `... createLogger(...)` replaced with `... new Logger(Config)`
 - Logger emit calls (info, debug, etc.) now expect
+
+## 0.0.2
+
+### Added
+
+- global disable (via env var or `src/global.ts` functions)
+- noop logger
+
+### Changed
+
+-
+
+### Breaking
+
+-
