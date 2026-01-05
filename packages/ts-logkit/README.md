@@ -388,21 +388,24 @@ The environment variable check happens automatically when the `init.ts` module i
 You can also control logging programmatically using the global functions:
 
 ```ts
-import {
-  setLoggingEnabled,
-  isLoggingEnabled,
-} from "@buchanan-solutions/ts-logkit";
+import { Global } from "@buchanan-solutions/ts-logkit";
 
 // Disable logging globally
-setLoggingEnabled(false);
+Global.setLoggingEnabled(false);
 
 // Check if logging is enabled
-if (isLoggingEnabled()) {
+if (Global.isLoggingEnabled()) {
   // Logging is active
 }
 
 // Re-enable logging
-setLoggingEnabled(true);
+Global.setLoggingEnabled(true);
+
+// Set global minimum log level
+Global.setLogLevel("debug");
+
+// Get current global log level
+const currentLevel = Global.getLogLevel();
 ```
 
 **Use cases:**

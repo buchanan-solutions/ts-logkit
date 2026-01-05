@@ -5,16 +5,8 @@ import { Hook } from "./types/hook";
 import { Formatter } from "./types/formatter";
 import { Config } from "./types/config";
 import { splitError } from "./utils/splitError";
-import { isLoggingEnabled } from "./global";
-
-const LEVEL_ORDER: Level[] = [
-  "trace",
-  "debug",
-  "info",
-  "warn",
-  "error",
-  "fatal",
-];
+import Global from "./global";
+import { LEVELS } from "./types/level";
 
 export class Logger {
   private _id: string;
@@ -34,11 +26,20 @@ export class Logger {
   }
 
   private shouldLog(level: Level) {
-    return LEVEL_ORDER.indexOf(level) >= LEVEL_ORDER.indexOf(this._minLevel);
+    const loggerIndex = LEVELS.indexOf(level);
+    const minLoggerIndex = LEVELS.indexOf(this._minLevel);
+    const globalLevel = Global.getLogLevel();
+    const minGlobalIndex = LEVELS.indexOf(globalLevel);
+
+    // Only log if level >= both logger minLevel AND global minLevel
+    // Both conditions must be true - check each explicitly
+    const passesLoggerLevel = loggerIndex >= minLoggerIndex;
+    const passesGlobalLevel = loggerIndex >= minGlobalIndex;
+    return passesLoggerLevel && passesGlobalLevel;
   }
 
   private async emit(event: Event) {
-    if (!isLoggingEnabled()) return;
+    if (!Global.isLoggingEnabled()) return;
     if (!this.shouldLog(event.level)) return;
 
     // Send the full event to all transports

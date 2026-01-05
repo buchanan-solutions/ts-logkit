@@ -5,4 +5,4 @@ export * from "./noop";
 export * from "./transports";
 export * from "./formatters";
 export * from "./types";
-export * from "./global";
+export { default as Global } from "./global";
