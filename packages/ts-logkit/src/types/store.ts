@@ -1,7 +1,16 @@
-import { Config } from "./config";
+import { Level } from "./level";
 
-/** System-wide logging configuration is just an array of Config */
-export type SystemConfig = Config[];
+/**
+ * Serializable configuration stored in the store
+ * Only contains data that can be serialized (no functions/objects)
+ */
+export interface LoggerStoreConfig {
+  id: string;
+  level?: Level;
+}
+
+/** System-wide logging configuration is just an array of LoggerStoreConfig */
+export type SystemConfig = LoggerStoreConfig[];
 
 /**
  * Interface for storage of logger configs
@@ -14,8 +23,19 @@ export interface Store {
   setAll(configs: SystemConfig): Promise<void>;
 
   /** Get a single logger's config by name */
-  get(name: string): Promise<Config>;
+  get(name: string): Promise<LoggerStoreConfig>;
 
   /** Save or update a single logger config */
-  set(config: Config): Promise<void>;
+  set(config: LoggerStoreConfig): Promise<void>;
+
+  /**
+   * Subscribe to changes for a specific logger's config
+   * @param name - The logger name/id to subscribe to
+   * @param callback - Function called when the config changes
+   * @returns Unsubscribe function to stop listening to changes
+   */
+  subscribe?(
+    name: string,
+    callback: (config: LoggerStoreConfig) => void
+  ): () => void;
 }
