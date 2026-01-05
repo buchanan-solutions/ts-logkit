@@ -6,6 +6,7 @@ import { Level } from "./level";
  * @description This is the event object for a log. It is used to store the log event data and is used by the transport to log the event.
  *
  * @interface Event
+ * @property {string} logger_id - The id of the logger that emitted the event
  * @property {Level} level - The level of the event
  * @property {string} message - The message of the event
  * @property {number} timestamp - The timestamp of the event
@@ -13,6 +14,7 @@ import { Level } from "./level";
  * @property {unknown} [error] - The error of the event
  */
 export interface Event {
+  logger_id: string;
   level: Level;
   message: string;
   timestamp: number;

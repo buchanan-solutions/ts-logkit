@@ -17,7 +17,7 @@ export function formatDev(event: Event): [string, ...unknown[]] {
   const levelLabel = event.level.toUpperCase();
 
   const parts: unknown[] = [
-    `${time} ${color}[${levelLabel}]${RESET} \t${event.message}`,
+    `(${event.logger_id}) ${color}[${levelLabel}]${RESET} \t${event.message}`,
     ...(event.args ?? []),
     ...(event.error ? [event.error] : []),
   ];

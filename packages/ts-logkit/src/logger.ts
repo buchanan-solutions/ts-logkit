@@ -67,6 +67,7 @@ export class Logger {
   trace(message: string, ...args: unknown[]) {
     const { args: filteredArgs, error } = splitError(args);
     void this.emit({
+      logger_id: this._id,
       level: "trace",
       message,
       args: filteredArgs,
@@ -77,6 +78,7 @@ export class Logger {
   debug(message: string, ...args: unknown[]) {
     const { args: filteredArgs, error } = splitError(args);
     void this.emit({
+      logger_id: this._id,
       level: "debug",
       message,
       args: filteredArgs,
@@ -87,6 +89,7 @@ export class Logger {
   info(message: string, ...args: unknown[]) {
     const { args: filteredArgs, error } = splitError(args);
     void this.emit({
+      logger_id: this._id,
       level: "info",
       message,
       args: filteredArgs,
@@ -97,6 +100,7 @@ export class Logger {
   warn(message: string, ...args: unknown[]) {
     const { args: filteredArgs, error } = splitError(args);
     void this.emit({
+      logger_id: this._id,
       level: "warn",
       message,
       args: filteredArgs,
@@ -107,6 +111,7 @@ export class Logger {
   error(message: string, ...args: unknown[]) {
     const { args: filteredArgs, error } = splitError(args);
     void this.emit({
+      logger_id: this._id,
       level: "error",
       message,
       args: filteredArgs,
@@ -117,6 +122,7 @@ export class Logger {
   fatal(message: string, ...args: unknown[]) {
     const { args: filteredArgs, error } = splitError(args);
     void this.emit({
+      logger_id: this._id,
       level: "fatal",
       message,
       args: filteredArgs,
