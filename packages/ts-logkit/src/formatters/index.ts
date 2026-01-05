@@ -1,2 +1,2 @@
-export { formatDev, DevFormatter } from "./dev";
-export { formatBrowser, BrowserFormatter } from "./browser";
+export { formatDev, devFormatter } from "./dev";
+// export { formatBrowser, browserFormatter } from "./browser"; // NOT SUPPORTED FOR NOW

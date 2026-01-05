@@ -1,4 +1,6 @@
-import { Level, LEVELS } from "./types";
+import { Registry } from "./registry";
+import { Level } from "./types";
+import { validateLevelAndWarn } from "./utils/validateLevel";
 
 export class Global {
   private static _enabled = true;
@@ -19,12 +21,27 @@ export class Global {
   }
 
   static set level(value: Level) {
-    if (!LEVELS.includes(value)) {
-      console.warn(
-        `[ts-logkit] Invalid log level in Global.level=("${value}"), ignoring.`
-      );
-      return;
-    }
-    Global._level = value;
+    validateLevelAndWarn(value, {
+      qualifier: "Global.level",
+      onSuccess: () => {
+        Global._level = value;
+      },
+      onFailure: () => {
+        return;
+      },
+    });
   }
+}
+
+/** Control ts-logkit internal diagnostic logging */
+export function setInternalLogLevel(level: Level) {
+  validateLevelAndWarn(level, {
+    qualifier: "src/global.ts:setAllClassLoggingToLevel",
+    onSuccess: () => {
+      Registry.logLevel = level;
+    },
+    onFailure: () => {
+      return;
+    },
+  });
 }

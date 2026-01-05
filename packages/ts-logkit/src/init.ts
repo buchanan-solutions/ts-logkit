@@ -1,7 +1,7 @@
 // src/init.ts
 import { Global } from "./global";
 import { Level } from "./types";
-import { LEVELS } from "./types/level";
+import { validateLevelAndWarn } from "./utils/validateLevel";
 
 function readEnvFlag(): boolean | undefined {
   // Node
@@ -39,12 +39,21 @@ function readEnvLevel(): Level | undefined {
     return undefined;
   }
 
-  if (LEVELS.includes(v as Level)) {
-    return v as Level;
-  }
+  // if (validateLevel(v as Level)) {
+  //   return v as Level;
+  // }
+  validateLevelAndWarn(v as Level, {
+    qualifier: "init.ts:readEnvLevel [env: TS_LOGKIT_LEVEL]",
+    onSuccess: () => {
+      return v as Level;
+    },
+    onFailure: () => {
+      return undefined;
+    },
+  });
 
-  console.warn(`[ts-logkit] Invalid TS_LOGKIT_LEVEL value: "${v}", ignoring.`);
-  return undefined;
+  // console.warn(`[ts-logkit] Invalid TS_LOGKIT_LEVEL value: "${v}", ignoring.`);
+  // return undefined;
 }
 
 // Apply global toggle

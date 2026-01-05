@@ -8,3 +8,4 @@ export * from "./formatters";
 export * from "./types";
 export { Global } from "./global";
 export * from "./stores";
+export * from "./utils";

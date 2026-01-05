@@ -11,7 +11,7 @@ const ANSI_COLORS = {
 
 const RESET = "\x1b[0m";
 
-export function formatDev(event: Event): [string, ...unknown[]] {
+export function formatDev(event: Event): FormattedOutput {
   const color = ANSI_COLORS[event.level];
   // const time = new Date(event.timestamp).toISOString();
   const levelLabel = event.level.toUpperCase();
@@ -29,8 +29,6 @@ export function formatDev(event: Event): [string, ...unknown[]] {
  * Development formatter for Node.js environments
  * Uses ANSI color codes for terminal output
  */
-export class DevFormatter implements Formatter {
-  format(event: Event): FormattedOutput {
-    return formatDev(event);
-  }
-}
+export const devFormatter: Formatter = {
+  format: formatDev,
+};

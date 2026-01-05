@@ -1,9 +1,9 @@
-import { Transport, Event } from "../types";
+import { Transport, Event, Formatter } from "../types";
 
 export function combineTransports(...transports: Transport[]): Transport {
   return {
-    log(event: Event) {
-      for (const t of transports) t.log(event);
+    log(event: Event, formatter?: Formatter) {
+      for (const t of transports) t.log(event, formatter);
     },
   };
 }

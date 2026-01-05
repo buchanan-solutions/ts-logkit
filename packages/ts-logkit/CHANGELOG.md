@@ -50,6 +50,10 @@
   - Logger instances can subscribe to store updates for runtime level changes
   - Stores only contain serializable data (level), not runtime objects (transports, formatters, hooks)
 - `destroy()` method on Logger for cleanup of store subscriptions
+- add utils (validateLevels, sholdLog)
+- Registry.logLevel (static class-level log verbosity for direct console.warns)
+- Global:setInternalLogLevel(level)
+  - sets all packages / classes that have static logging flags to whatever level to enable package-level logging for behavior testing
 
 ### Changed
 
@@ -58,4 +62,8 @@
 
 ### Breaking
 
--
+- pulled out dynamic reconfig logic from Logger (moved to registry & store)
+  - deleted async Logger.applyStoreConfig() and conditional store config behavior on Logger.constructor
+- pulled store out of factory so factory only takes in registry (where registry is what needs a store)
+  - registry > provides central registry for reconfigs (actual feature)
+  - store > provides some storage layer for registry to "pull" the configs if they exist and reapply at runtime / register time

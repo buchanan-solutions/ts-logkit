@@ -4,7 +4,6 @@ import { Transport } from "./types/transport";
 import { Hook } from "./types/hook";
 import { Formatter } from "./types/formatter";
 import { Config } from "./types/config";
-import { Store } from "./types/store";
 import { splitError } from "./utils/splitError";
 import { Global } from "./global";
 import { LEVELS } from "./types/level";
@@ -16,30 +15,14 @@ export class Logger {
   private _formatter: Formatter;
   private _hooks?: Hook[];
   private _type?: string;
-  private _unsubscribe?: () => void;
 
-  constructor(opts: Config, store?: Store) {
+  constructor(opts: Config) {
     this._id = opts.id;
     this._transports = opts.transports;
     this._formatter = opts.formatter;
     this._hooks = opts.hooks;
     this._minLevel = opts.level ?? "warn";
     this._type = opts.type;
-
-    if (store) {
-      // Apply initial override from store
-      void this.applyStoreConfig(store);
-
-      // Subscribe for updates if store supports subscriptions
-      if (store.subscribe) {
-        this._unsubscribe = store.subscribe(this._id, (config) => {
-          // Only apply level from store - transports, formatter, hooks are runtime-only
-          if (config.level !== undefined) {
-            this._minLevel = config.level;
-          }
-        });
-      }
-    }
   }
 
   get id(): string {
@@ -48,33 +31,6 @@ export class Logger {
 
   public setLevel(level: Level): void {
     this._minLevel = level;
-  }
-
-  /**
-   * Apply configuration from store (async)
-   * Store only contains serializable data (level), not runtime objects
-   */
-  private async applyStoreConfig(store: Store): Promise<void> {
-    try {
-      const config = await store.get(this._id);
-      // Only apply level from store - transports, formatter, hooks are runtime-only
-      if (config.level !== undefined) {
-        this._minLevel = config.level;
-      }
-    } catch (error) {
-      // Logger not found in store, use defaults - this is fine
-      // Silently ignore to prevent breaking logging
-    }
-  }
-
-  /**
-   * Clean up subscriptions when logger is no longer needed
-   */
-  destroy(): void {
-    if (this._unsubscribe) {
-      this._unsubscribe();
-      this._unsubscribe = undefined;
-    }
   }
 
   private shouldLog(level: Level) {
