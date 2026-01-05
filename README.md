@@ -1,143 +1,238 @@
-# BuchananSolutions TypeScript Logging Kit
+# Buchanan Solutions TypeScript LogKit Monorepo
 
-This repo is a **pnpm monorepo** containing the core SDK and framework-specific extensions.
-
----
-
-## `@buchanan-solutions/ts-logkit`
-
-The **core, framework-agnostic TypeScript logging SDK**.
-
-`ts-logkit` is designed to be **small, fast, and highly composable**, providing a modern, extensible logging framework for TypeScript applications while remaining fully decoupled from any UI or backend framework.
-
-Its goal is to **empower developers to add structured, consistent, and extensible logging** to their projects with minimal boilerplate, while keeping production and development concerns cleanly separated.
+A **pnpm monorepo** containing the core logging SDK and future framework-specific extensions.
 
 ---
 
-### Key Features
+## Table of Contents
 
-#### 1. **Structured Logger Instances**
-
-- Named loggers (`name`) with optional type categorization (`type`).
-- Per-logger log levels with numeric precedence for flexible filtering.
-- Context-aware logging: all log methods accept optional context objects.
-- Fully typed TypeScript interface for safety (`LogLevel`, `LogEvent`, `LogTransport`, `LogHook`).
-
-#### 2. **Rich Log Levels**
-
-- Core levels: `trace`, `debug`, `info`, `warn`, `error`, `fatal`.
-- Extended levels for clarity and semantic tracking: `success`, `start`.
-- Automatic filtering based on current logger or module-level log levels.
-
-#### 3. **Pluggable Transport Interface**
-
-- Define multiple output destinations via `LogTransport`:
-
-  - Console
-  - Files (via adapters)
-  - Remote APIs or telemetry systems
-  - Third-party logging libraries (like Pino, Bunyan)
-
-- Each transport decides how to render or persist log events.
-- Supports synchronous or asynchronous transports for safe fanout.
-
-#### 4. **Hook-Based Extensions**
-
-- `LogHook` interface for side effects such as:
-
-  - Sending logs to external services
-  - Analytics or monitoring events
-  - Custom formatting or enrichment pipelines
-
-- Hooks are async-capable, fail-safe, and non-blocking.
-- Multiple hooks can be attached per logger or per transport.
-
-#### 5. **Central Logger Registry**
-
-- Tracks logger instances at runtime for:
-
-  - Global log-level overrides
-  - Dynamic log-level updates across multiple modules
-  - Discovery and management of all loggers in an application
-
-- Framework-agnostic: registry logic lives entirely in core.
-- Compatible with **adapters** that persist configuration (e.g., localStorage for Next.js clients).
-
-#### 6. **Development-Mode Features**
-
-- ANSI-colored console output for clear, readable logs in terminals.
-- Optional trace logs that include caller context.
-- Extensible formatter layer for customizing message layouts and colors.
-- Supports browser-safe formatting for client-side logs.
-
-#### 7. **Future-Proof Architecture**
-
-- Clear separation of **core logging** vs **framework-specific adapters**.
-- Extensible configuration provider interface for storage backends:
-
-  - LocalStorage
-  - Redis
-  - File-system
-  - REST / API endpoints
-
-- Designed for incremental adoption:
-
-  - Start with console logging
-  - Add persistence or remote logging later
-
-- Safe for server, client, and universal applications.
+- [Monorepo Overview](#-monorepo-overview)
+  - [Independent Package Philosophy](#-independent-package-philosophy)
+- [Available Packages](#-available-packages)
+- [Getting Started](#-getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Development Workflow](#development-workflow)
+- [Publishing & Distribution](#-publishing--distribution)
+- [Repository Structure](#-repository-structure)
+- [Development Guidelines](#-development-guidelines)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ---
 
-### Responsibilities of `ts-logkit` Core
+## 📦 Monorepo Overview
 
-1. Provide a **stable, fully typed logging API** for developers.
-2. Manage a **central, framework-agnostic registry** of logger instances.
-3. Enable **pluggable transports** and **hook-based log fanout**.
-4. Offer **colored, context-rich development logging**.
-5. Expose hooks and interfaces to support **future persistence and integrations**, without forcing any implementation.
+This repository uses [pnpm workspaces](https://pnpm.io/workspaces) to manage multiple packages efficiently:
+
+```
+ts-logkit/
+├── packages/
+│   └── ts-logkit/          # Core, framework-agnostic logging SDK
+├── package.json           # Workspace root configuration
+└── pnpm-lock.yaml         # Dependency lock file
+```
+
+### 🎯 Independent Package Philosophy
+
+Each package in this monorepo is designed to be:
+
+- **Self-contained** - No cross-dependencies between packages
+- **Independently versioned** - Each package has its own semantic versioning
+- **Separately published** - Packages are published to GitHub Package Registry independently
+- **Focused** - Each package solves a specific problem domain
 
 ---
 
-### Intended Usage
+## 📚 Available Packages
 
-`ts-logkit` is intended to be used in:
+### [`@buchanan-solutions/ts-logkit`](packages/ts-logkit/)
 
-- **Node.js applications**: backend logging, CLI tools, server-side APIs.
-- **Browser / client apps**: debug console logging, feature flag-driven log levels, and telemetry.
-- **Framework-specific extensions**: e.g., `ts-logkit-next` for Next.js App Router integration.
-- **Microservices / SDKs**: any TypeScript package needing consistent logging.
+**Core, framework-agnostic logging SDK**
 
-Typical usage:
+A minimal, typed logging core built around explicit concepts: Loggers, Events, Formatters, Transports, and Hooks.
 
-```ts
-import {
-  createLogger,
-  createConsoleTransport,
-} from "@buchanan-solutions/ts-logkit";
+**Key Features:**
 
-const logger = createLogger({
-  name: "collector",
-  level: "debug",
-  transport: createConsoleTransport(),
-});
+- 📝 Structured logger instances with explicit identity
+- 📊 Rich log levels (trace, debug, info, warn, error, fatal)
+- 🚚 Pluggable transports (console, file, network, telemetry)
+- 🎨 Formatter layer (ANSI dev formatter, browser formatter)
+- 🪝 Hook system for side effects (metrics, analytics, error reporting)
+- 🌍 Environment-safe (Node.js, Browser, SSR, Edge runtimes)
 
-logger.info("Collector started", { deviceId: "abc" });
-logger.error("Failed to fetch data", { url, retries });
+See the [package README](packages/ts-logkit/README.md) for detailed documentation.
+
+### _(planned)_ `@buchanan-solutions/ts-logkit-next`
+
+Next.js adapter (App Router–aware)
+
+### _(planned)_ `@buchanan-solutions/ts-logkit-react`
+
+React helpers & context
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- pnpm (recommended) or npm/yarn
+- Git
+
+### Installation
+
+Clone the repository:
+
+```bash
+git clone <repository-url>
+cd ts-logkit
+```
+
+Install dependencies:
+
+```bash
+pnpm install
+```
+
+### Development Workflow
+
+Run tests for all packages:
+
+```bash
+pnpm test
+```
+
+Run tests for a specific package:
+
+```bash
+pnpm --filter @buchanan-solutions/ts-logkit test
+```
+
+Build all packages:
+
+```bash
+pnpm build
+```
+
+Build a specific package:
+
+```bash
+pnpm --filter @buchanan-solutions/ts-logkit build
+```
+
+Watch for changes and rebuild:
+
+```bash
+pnpm watch
 ```
 
 ---
 
-## Design Principles
+## 📦 Publishing & Distribution
 
-- **Framework-Agnostic Core**: Core logging never depends on React, Next.js, or Node APIs.
-- **Composable & Extensible**: Easily add new transports, hooks, or formatters.
-- **Centralized Control**: Central registry allows runtime adjustments without touching individual logger instances.
-- **Minimal Core Overhead**: No storage, network, or external dependency assumptions.
-- **Future-Ready**: Supports modern TypeScript workflows and upcoming framework adapters.
+Packages are published to **GitHub Package Registry**:
 
-Notes:
+- 🌐 Fully public
+- 🔢 Semantic versioning
+- 📦 Independent package versions per workspace
 
-- Loggers will default to "warn" cause that is my preference lol
-  - Warn is nice cause they shoulnd't happen often and foreces info or debug levels to be explicit (keeps logging quiet by default)
-- Can globally set logger package to disabled or can globally set log level (then log level is chekced )
+This allows:
+
+- 🎯 Controlled releases
+- 🔐 Fine-grained access
+- 🧩 Clean separation between core and adapters
+
+### Publishing Workflow
+
+Each package is published independently. The process typically involves:
+
+1. Update version in the package's `package.json`
+2. Update `CHANGELOG.md` with changes
+3. Commit changes
+4. Create and push a version tag
+5. Monitor CI/CD for successful publication
+
+See individual package documentation for specific publishing instructions.
+
+---
+
+## 📁 Repository Structure
+
+```
+ts-logkit/
+├── packages/
+│   └── ts-logkit/          # Core logging package
+│       ├── src/            # Source code
+│       ├── tests/          # Unit tests
+│       ├── dist/           # Built output (gitignored)
+│       ├── README.md       # Package documentation
+│       ├── package.json    # Package configuration
+│       └── tsconfig.json   # TypeScript configuration
+├── package.json            # Workspace root configuration
+├── pnpm-lock.yaml          # Dependency lock file
+└── README.md               # This file
+```
+
+---
+
+## 🔧 Development Guidelines
+
+### Adding a New Package
+
+1. Create package directory: `packages/your-package-name/`
+2. Add `package.json` with proper configuration
+3. Set up TypeScript configuration
+4. Add tests with Vitest
+5. Create comprehensive README
+6. Add development documentation
+
+### Package Structure Standards
+
+Each package should follow this structure:
+
+```
+packages/your-package/
+├── src/                 # Source code
+├── tests/              # Unit tests
+├── dist/               # Built output (gitignored)
+├── README.md           # Package documentation
+├── package.json        # Package configuration
+├── tsconfig.json       # TypeScript configuration
+└── vitest.config.ts    # Test configuration
+```
+
+### Code Quality
+
+- **TypeScript**: Strict type checking enabled
+- **Testing**: Comprehensive unit test coverage
+- **Linting**: ESLint configuration
+- **Documentation**: README and API documentation
+- **CI/CD**: Automated testing and publishing
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome, especially for:
+
+- 🔌 Additional transports
+- 🔗 Framework adapters
+- 📝 Documentation improvements
+- 💡 Real-world usage examples
+
+Basic workflow:
+
+1. Fork the repository
+2. Install with `pnpm install`
+3. Make changes
+4. Ensure tests pass: `pnpm test`
+5. Update documentation if needed
+6. Open a PR with a clear description
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
