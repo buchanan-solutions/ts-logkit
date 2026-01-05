@@ -156,10 +156,9 @@ Formatters convert a structured `Event` into displayable output.
 
 Included formatters:
 
-- 🎨 **ANSI development formatter** (Node.js)
-- 🌈 **Browser `%c` formatter** (CSS-styled console output)
+- 🎨 **Development formatter** (`devFormatter`) - ANSI color codes for Node.js terminal output
 
-Formatters are optional—transports may ignore them entirely.
+Formatters are optional—transports may ignore them entirely. You can create custom formatters for browser environments or other use cases.
 
 ---
 
@@ -242,13 +241,13 @@ pnpm add @buchanan-solutions/ts-logkit
 import {
   Logger,
   createConsoleTransport,
-  DevFormatter,
+  devFormatter,
 } from "@buchanan-solutions/ts-logkit";
 
 const logger = new Logger({
   id: "collector",
   level: "debug",
-  formatter: new DevFormatter(),
+  formatter: devFormatter,
   transports: [createConsoleTransport()],
 });
 
@@ -277,11 +276,12 @@ Loggers are cheap to create and safe to share.
 
 An `Event` is a structured object containing:
 
-- `level`
-- `message`
-- `timestamp`
-- optional `args`
-- optional `error`
+- `logger_id` - The ID of the logger that emitted the event
+- `level` - The log level
+- `message` - The log message
+- `timestamp` - Unix timestamp (milliseconds)
+- `args` (optional) - Console-style arguments
+- `error` (optional) - Error object if present
 
 All transports and hooks operate on this same shape.
 
@@ -352,13 +352,13 @@ Factories enable:
 
 - 🏭 Creating loggers with consistent transports, formatters, and hooks
 - 📊 Centralized configuration management
-- 🔄 Optional store integration for dynamic level updates
+- 🔄 Optional registry integration for dynamic level updates via stores
 
 ---
 
 ### Store
 
-A `Store` manages logger configurations for dynamic runtime updates.
+A `Store` manages logger configurations for dynamic runtime updates. Stores are used via the `Registry` class.
 
 ```ts
 interface Store {
@@ -370,6 +370,7 @@ interface Store {
     name: string,
     callback: (config: LoggerStoreConfig) => void
   ): () => void;
+  subscribeAll?(callback: (config: LoggerStoreConfig) => void): () => void;
 }
 ```
 
@@ -378,9 +379,30 @@ Stores enable:
 - 🔄 Runtime log level changes without restarting
 - 💾 Persistence of logger configurations
 - 📡 Remote configuration updates (via custom store implementations)
-- 🔌 Optional subscription-based updates
+- 🔌 Optional subscription-based updates (per-logger or system-wide)
 
 **Important:** Stores only contain serializable data (logger `id` and `level`). Runtime objects like transports, formatters, and hooks are not stored and remain runtime-only.
+
+### Registry
+
+A `Registry` manages logger lifecycle and applies store configurations to registered loggers. The registry is used with factories to enable dynamic configuration updates.
+
+```ts
+const registry = new Registry();
+const store = new InMemoryStore();
+registry.attachStore(store);
+
+const factory = createLoggerFactory({
+  // ... config
+  registry, // Loggers created by factory will be registered
+});
+```
+
+The registry automatically:
+
+- Applies store configurations to registered loggers
+- Subscribes to store updates and updates loggers in real-time
+- Manages logger lifecycle (register/unregister)
 
 ---
 
@@ -463,29 +485,49 @@ NEXT_PUBLIC_TS_LOGKIT_DISABLED=false
 
 The environment variable check happens automatically when the `init.ts` module is imported. The logging state is set globally and affects all logger instances.
 
+##### Global Log Level via Environment Variable
+
+You can also set a global minimum log level using environment variables:
+
+**Node.js / Server-Side:**
+
+```bash
+TS_LOGKIT_LEVEL=debug
+```
+
+**Browser / Next.js Client-Side:**
+
+```bash
+NEXT_PUBLIC_TS_LOGKIT_LEVEL=debug
+```
+
+**Accepted values:** `trace`, `debug`, `info`, `warn`, `error`, `fatal`
+
+The global log level acts as an additional filter—loggers will only emit events that meet both their own level threshold and the global level threshold.
+
 #### Programmatic API
 
-You can also control logging programmatically using the global functions:
+You can also control logging programmatically using the Global class properties:
 
 ```ts
 import { Global } from "@buchanan-solutions/ts-logkit";
 
 // Disable logging globally
-Global.setLoggingEnabled(false);
+Global.enabled = false;
 
 // Check if logging is enabled
-if (Global.isLoggingEnabled()) {
+if (Global.enabled) {
   // Logging is active
 }
 
 // Re-enable logging
-Global.setLoggingEnabled(true);
+Global.enabled = true;
 
 // Set global minimum log level
-Global.setLogLevel("debug");
+Global.level = "debug";
 
 // Get current global log level
-const currentLevel = Global.getLogLevel();
+const currentLevel = Global.level;
 ```
 
 **Use cases:**
@@ -504,17 +546,23 @@ Use a factory to create multiple loggers with shared configuration:
 import {
   createLoggerFactory,
   createConsoleTransport,
-  DevFormatter,
+  devFormatter,
+  Registry,
   InMemoryStore,
 } from "@buchanan-solutions/ts-logkit";
 
+// Create a registry for dynamic configuration (optional)
+const registry = new Registry();
 const store = new InMemoryStore();
+
+// Attach store to registry for persistence
+registry.attachStore(store);
 
 const factory = createLoggerFactory({
   transports: [createConsoleTransport()],
-  formatter: new DevFormatter(),
+  formatter: devFormatter,
   level: "info",
-  store, // Optional: enables dynamic level updates
+  registry, // Optional: enables dynamic level updates via registry
 });
 
 // Create loggers with shared config
@@ -528,36 +576,42 @@ const authLogger = factory.createLogger("auth", { type: "security" });
 - Consistent configuration across loggers
 - Centralized transport/formatter/hook management
 - Easy to create many loggers with similar setup
+- Optional registry integration for dynamic configuration updates
 
 ---
 
 ### Store System for Dynamic Configuration
 
-Stores enable runtime log level changes without restarting your application:
+Stores enable runtime log level changes without restarting your application. Stores are used via the `Registry` class, which manages logger lifecycle and dynamic configuration.
 
 ```ts
 import {
-  Logger,
+  createLoggerFactory,
   createConsoleTransport,
-  DevFormatter,
+  devFormatter,
+  Registry,
   InMemoryStore,
 } from "@buchanan-solutions/ts-logkit";
 
-// Create a store
+// Create a registry and store
+const registry = new Registry();
 const store = new InMemoryStore();
 
-// Create logger with store
-const logger = new Logger(
-  {
-    id: "my-service",
-    level: "warn",
-    transports: [createConsoleTransport()],
-    formatter: new DevFormatter(),
-  },
-  store // Pass store to enable dynamic updates
-);
+// Attach store to registry
+registry.attachStore(store);
 
-// Later, update log level dynamically
+// Create factory with registry
+const factory = createLoggerFactory({
+  transports: [createConsoleTransport()],
+  formatter: devFormatter,
+  level: "warn",
+  registry, // Registry will manage loggers and apply store configs
+});
+
+// Create logger - it will be automatically registered
+const logger = factory.createLogger("my-service");
+
+// Later, update log level dynamically via store
 await store.set({ id: "my-service", level: "debug" });
 // Logger automatically updates its level if store supports subscriptions
 
@@ -571,9 +625,10 @@ await store.setAll([
 **Store Features:**
 
 - **Serializable only:** Stores only persist `id` and `level` (no functions/objects)
-- **Optional subscriptions:** Stores can implement `subscribe()` for real-time updates
+- **Optional subscriptions:** Stores can implement `subscribe()` or `subscribeAll()` for real-time updates
 - **Persistence ready:** Implement custom stores for localStorage, Redis, databases, etc.
 - **Runtime-safe:** Store failures never break logging
+- **Registry integration:** Registry automatically applies store configs to registered loggers
 
 **Creating Custom Stores:**
 
@@ -613,6 +668,13 @@ class LocalStorageStore implements Store {
     }
     await this.setAll(configs);
   }
+
+  // Optional: implement subscribeAll for real-time updates
+  subscribeAll?(callback: (config: LoggerStoreConfig) => void): () => void {
+    // Implementation for listening to localStorage changes
+    // Return unsubscribe function
+    return () => {};
+  }
 }
 ```
 
@@ -631,11 +693,20 @@ const transport = combineTransports(createConsoleTransport(), customTransport);
 ### Custom Formatter
 
 ```ts
-class JsonFormatter {
+import { Formatter, Event } from "@buchanan-solutions/ts-logkit";
+
+class JsonFormatter implements Formatter {
   format(event: Event) {
     return JSON.stringify(event);
   }
 }
+
+// Use it
+const logger = new Logger({
+  id: "my-logger",
+  formatter: new JsonFormatter(),
+  transports: [createConsoleTransport()],
+});
 ```
 
 ---

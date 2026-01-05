@@ -148,23 +148,41 @@ Packages are published to **GitHub Package Registry**:
 - 🔢 Semantic versioning
 - 📦 Independent package versions per workspace
 
-This allows:
-
-- 🎯 Controlled releases
-- 🔐 Fine-grained access
-- 🧩 Clean separation between core and adapters
+This repository uses [Changesets](https://github.com/changesets/changesets) to manage versioning and changelogs. Each package maintains its own `CHANGELOG.md` that is automatically updated during the release process.
 
 ### Publishing Workflow
 
-Each package is published independently. The process typically involves:
+1. **Create a changeset** for your changes:
 
-1. Update version in the package's `package.json`
-2. Update `CHANGELOG.md` with changes
-3. Commit changes
-4. Create and push a version tag
-5. Monitor CI/CD for successful publication
+```bash
+pnpm changeset
+```
 
-See individual package documentation for specific publishing instructions.
+Select the package(s) to update and choose a version bump (`patch`, `minor`, or `major`). Enter a description of your changes—you can use markdown formatting with sections like `### Added`, `### Changed`, `### Breaking`.
+
+2. **Update versions and changelogs**:
+
+```bash
+pnpm changeset version
+```
+
+This updates `package.json` versions and generates/updates the `CHANGELOG.md` for each affected package.
+
+3. **Commit and push**:
+
+```bash
+git add .
+git commit -m "chore: release"
+git push
+```
+
+4. **Publish**:
+
+```bash
+pnpm changeset publish
+```
+
+This publishes the updated packages to GitHub Package Registry using your `.npmrc` authentication.
 
 ---
 

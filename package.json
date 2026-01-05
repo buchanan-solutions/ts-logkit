@@ -14,6 +14,8 @@
   "license": "MIT",
   "description": "",
   "devDependencies": {
+    "@changesets/cli": "^2.29.8",
+    "@types/node": "^25.0.3",
     "vite-tsconfig-paths": "^6.0.3",
     "vitest": "^1.2.0"
   },
