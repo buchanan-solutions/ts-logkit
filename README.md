@@ -128,6 +128,16 @@ Watch for changes and rebuild:
 pnpm watch
 ```
 
+Publish package:
+
+```bash
+# Check build is successfull locally
+pnpm -C packages/ts-logkit build
+
+# Publish to specified registry (comes from package.json, assumes valid .npmrc with auth credentials somewhere in working directory)
+pnpm publish --filter @buchanan-solutions/ts-logkit --access public
+```
+
 ---
 
 ## 📦 Publishing & Distribution
