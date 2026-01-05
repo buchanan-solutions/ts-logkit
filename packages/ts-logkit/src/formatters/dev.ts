@@ -1,6 +1,6 @@
 import { Event, Formatter, FormattedOutput } from "../types";
 
-const COLORS = {
+const ANSI_COLORS = {
   trace: "\x1b[90m",
   debug: "\x1b[36m",
   info: "\x1b[32m",
@@ -11,16 +11,18 @@ const COLORS = {
 
 const RESET = "\x1b[0m";
 
-export function formatDev(event: Event): string {
-  const color = COLORS[event.level];
+export function formatDev(event: Event): [string, ...unknown[]] {
+  const color = ANSI_COLORS[event.level];
   const time = new Date(event.timestamp).toISOString();
+  const levelLabel = event.level.toUpperCase();
 
-  return (
-    `${color}[${event.level.toUpperCase()}]${RESET} ` +
-    `${time} ${event.message}` +
-    (event.context ? ` ${JSON.stringify(event.context)}` : "") +
-    (event.error ? `\n${event.error.stack}` : "")
-  );
+  const parts: unknown[] = [
+    `${time} ${color}[${levelLabel}]${RESET} \t${event.message}`,
+    ...(event.args ?? []),
+    ...(event.error ? [event.error] : []),
+  ];
+
+  return parts as [string, ...unknown[]];
 }
 
 /**

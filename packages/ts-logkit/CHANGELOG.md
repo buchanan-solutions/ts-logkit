@@ -23,13 +23,16 @@
 ### Added
 
 - `src/transports:combineTransports` function for consumers to conveniently combine multiple transports
--
+- Loggers now support multiple transports
 
 ### Changed
 
 - Simplified error handling: removed any verbose error or error verbosity features to keep the API simple and put the responsibility of what to log on the user
 - refactored `src/types`
+- seperated concerns for `formatters` and `trasnports`
+-
 
 ### Breaking
 
--
+- removed `... createLogger(...)` replaced with `... new Logger(Config)`
+- Logger emit calls (info, debug, etc.) now expect

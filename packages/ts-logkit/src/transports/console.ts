@@ -33,9 +33,11 @@ export function createConsoleTransport(): Transport {
   return {
     log(event: Event, formatter?: Formatter) {
       // Format the event using the provided formatter
+      // If no formatter, pass through message and args directly (console-style)
       const formatted: FormattedOutput = formatter?.format(event) ?? [
         event.message,
-        event.context,
+        ...(event.args ?? []),
+        ...(event.error ? [event.error] : []),
       ];
 
       // Get the appropriate console method based on event level

@@ -140,4 +140,4 @@ Notes:
 
 - Loggers will default to "warn" cause that is my preference lol
   - Warn is nice cause they shoulnd't happen often and foreces info or debug levels to be explicit (keeps logging quiet by default)
--
+- Can globally set logger package to disabled or can globally set log level (then log level is chekced )

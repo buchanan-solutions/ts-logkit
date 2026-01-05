@@ -4,6 +4,7 @@ import { Transport } from "./types/transport";
 import { Hook } from "./types/hook";
 import { Formatter } from "./types/formatter";
 import { Config } from "./types/config";
+import { splitError } from "./utils/splitError";
 
 const LEVEL_ORDER: Level[] = [
   "trace",
@@ -20,13 +21,14 @@ export class Logger {
   private _transports: Transport[];
   private _formatter: Formatter;
   private _hooks?: Hook[];
-
+  private _type?: string;
   constructor(opts: Config) {
     this._id = opts.id;
     this._transports = opts.transports;
     this._formatter = opts.formatter;
     this._hooks = opts.hooks;
     this._minLevel = opts.level ?? "warn";
+    this._type = opts.type;
   }
 
   private shouldLog(level: Level) {
@@ -58,53 +60,63 @@ export class Logger {
     }
   }
 
-  trace(msg: string, ctx?: Record<string, unknown>) {
+  trace(message: string, ...args: unknown[]) {
+    const { args: filteredArgs, error } = splitError(args);
     void this.emit({
       level: "trace",
-      message: msg,
-      context: ctx,
+      message,
+      args: filteredArgs,
+      error,
       timestamp: Date.now(),
     });
   }
-  debug(msg: string, ctx?: Record<string, unknown>) {
+  debug(message: string, ...args: unknown[]) {
+    const { args: filteredArgs, error } = splitError(args);
     void this.emit({
       level: "debug",
-      message: msg,
-      context: ctx,
+      message,
+      args: filteredArgs,
+      error,
       timestamp: Date.now(),
     });
   }
-  info(msg: string, ctx?: Record<string, unknown>) {
+  info(message: string, ...args: unknown[]) {
+    const { args: filteredArgs, error } = splitError(args);
     void this.emit({
       level: "info",
-      message: msg,
-      context: ctx,
+      message,
+      args: filteredArgs,
+      error,
       timestamp: Date.now(),
     });
   }
-  warn(msg: string, ctx?: Record<string, unknown>) {
+  warn(message: string, ...args: unknown[]) {
+    const { args: filteredArgs, error } = splitError(args);
     void this.emit({
       level: "warn",
-      message: msg,
-      context: ctx,
+      message,
+      args: filteredArgs,
+      error,
       timestamp: Date.now(),
     });
   }
-  error(msg: string, err?: Error, ctx?: Record<string, unknown>) {
+  error(message: string, ...args: unknown[]) {
+    const { args: filteredArgs, error } = splitError(args);
     void this.emit({
       level: "error",
-      message: msg,
-      error: err,
-      context: ctx,
+      message,
+      args: filteredArgs,
+      error,
       timestamp: Date.now(),
     });
   }
-  fatal(msg: string, err?: Error, ctx?: Record<string, unknown>) {
+  fatal(message: string, ...args: unknown[]) {
+    const { args: filteredArgs, error } = splitError(args);
     void this.emit({
       level: "fatal",
-      message: msg,
-      error: err,
-      context: ctx,
+      message,
+      args: filteredArgs,
+      error,
       timestamp: Date.now(),
     });
   }
