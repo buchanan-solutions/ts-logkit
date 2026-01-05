@@ -5,6 +5,7 @@ import { Hook } from "./types/hook";
 import { Formatter } from "./types/formatter";
 import { Config } from "./types/config";
 import { splitError } from "./utils/splitError";
+import { isLoggingEnabled } from "./global";
 
 const LEVEL_ORDER: Level[] = [
   "trace",
@@ -22,6 +23,7 @@ export class Logger {
   private _formatter: Formatter;
   private _hooks?: Hook[];
   private _type?: string;
+
   constructor(opts: Config) {
     this._id = opts.id;
     this._transports = opts.transports;
@@ -36,6 +38,7 @@ export class Logger {
   }
 
   private async emit(event: Event) {
+    if (!isLoggingEnabled()) return;
     if (!this.shouldLog(event.level)) return;
 
     // Send the full event to all transports

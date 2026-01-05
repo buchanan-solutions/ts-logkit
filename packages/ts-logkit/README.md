@@ -34,6 +34,7 @@ It favors **clarity, explicitness, and extensibility** over hidden magic, making
 - [Architecture Overview](#-architecture-overview)
 - [Environment Support](#-environment-support)
 - [Advanced Usage](#-advanced-usage)
+  - [Disabling Logging via Environment Variables](#disabling-logging-via-environment-variables)
   - [Multiple Transports](#multiple-transports)
   - [Custom Formatter](#custom-formatter)
   - [Hooks for Telemetry](#hooks-for-telemetry)
@@ -335,6 +336,82 @@ Key guarantees:
 ---
 
 ## 🔧 Advanced Usage
+
+### Disabling Logging Globally
+
+You can globally disable logging at runtime using environment variables or programmatic API. This is useful for production deployments or testing scenarios where you want to suppress all logging output.
+
+#### Environment Variables
+
+##### Node.js / Server-Side
+
+Use the `TS_LOGKIT_DISABLED` environment variable:
+
+```bash
+# Disable logging
+TS_LOGKIT_DISABLED=1
+# or
+TS_LOGKIT_DISABLED=true
+
+# Enable logging (if disabled)
+TS_LOGKIT_DISABLED=0
+# or
+TS_LOGKIT_DISABLED=false
+```
+
+##### Browser / Next.js Client-Side
+
+For browser environments and Next.js client-side code, use the `NEXT_PUBLIC_TS_LOGKIT_DISABLED` environment variable:
+
+```bash
+# Disable logging
+NEXT_PUBLIC_TS_LOGKIT_DISABLED=1
+# or
+NEXT_PUBLIC_TS_LOGKIT_DISABLED=true
+
+# Enable logging (if disabled)
+NEXT_PUBLIC_TS_LOGKIT_DISABLED=0
+# or
+NEXT_PUBLIC_TS_LOGKIT_DISABLED=false
+```
+
+**Accepted values:**
+
+- `"1"` or `"true"` → disables logging
+- `"0"` or `"false"` → enables logging
+- Unset or any other value → no change (defaults to enabled)
+
+The environment variable check happens automatically when the `init.ts` module is imported. The logging state is set globally and affects all logger instances.
+
+#### Programmatic API
+
+You can also control logging programmatically using the global functions:
+
+```ts
+import {
+  setLoggingEnabled,
+  isLoggingEnabled,
+} from "@buchanan-solutions/ts-logkit";
+
+// Disable logging globally
+setLoggingEnabled(false);
+
+// Check if logging is enabled
+if (isLoggingEnabled()) {
+  // Logging is active
+}
+
+// Re-enable logging
+setLoggingEnabled(true);
+```
+
+**Use cases:**
+
+- Runtime configuration based on feature flags
+- Conditional logging in tests
+- Dynamic control based on user preferences or environment detection
+
+---
 
 ### Multiple Transports
 
