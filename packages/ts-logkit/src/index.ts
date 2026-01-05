@@ -1,6 +1,7 @@
 export * from "./init";
 
 export { Logger } from "./logger";
+export * from "./factory";
 export * from "./noop";
 export * from "./transports";
 export * from "./formatters";
