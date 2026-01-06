@@ -2,6 +2,7 @@ import { Level } from "./level";
 import { Transport } from "./transport";
 import { Hook } from "./hook";
 import { Formatter } from "./formatter";
+import { LoggerFactory } from "../factory";
 
 /**
  * Configuration for a logger
@@ -20,4 +21,5 @@ export interface Config {
   hooks?: Hook[];
   level?: Level;
   type?: string;
+  factory?: LoggerFactory;
 }

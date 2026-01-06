@@ -1,4 +1,5 @@
 import { LoggerLike } from "./types/loggerLike";
+import { Config } from "./types/config";
 
 export const NoopLogger: LoggerLike = {
   trace() {},
@@ -7,4 +8,7 @@ export const NoopLogger: LoggerLike = {
   warn() {},
   error() {},
   fatal() {},
+  child(_childId: string, _opts?: Partial<Config>): LoggerLike {
+    return NoopLogger;
+  },
 };

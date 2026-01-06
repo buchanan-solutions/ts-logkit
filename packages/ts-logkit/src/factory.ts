@@ -58,19 +58,22 @@ export interface LoggerFactory {
 export function createLoggerFactory(config: FactoryConfig): LoggerFactory {
   const { registry, ...runtimeConfig } = config;
 
-  return {
-    createLogger: (
-      id: string,
-      overrides?: { level?: Config["level"]; type?: Config["type"] }
-    ): Logger => {
+  const factory: LoggerFactory = {
+    createLogger: (id, overrides) => {
       const logger = new Logger({
         id,
         ...runtimeConfig,
         ...overrides,
       });
-      // Only register if registry is provided
-      registry?.register(logger);
+
+      // Attach factory reference
+      (logger as any).factory = factory;
+
+      // Set in registry if provided
+      registry?.set(logger);
       return logger;
     },
   };
+
+  return factory;
 }
