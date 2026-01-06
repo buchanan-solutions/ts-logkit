@@ -39,21 +39,18 @@ function readEnvLevel(): Level | undefined {
     return undefined;
   }
 
-  // if (validateLevel(v as Level)) {
-  //   return v as Level;
-  // }
+  let result: Level | undefined;
   validateLevelAndWarn(v as Level, {
     qualifier: "init.ts:readEnvLevel [env: TS_LOGKIT_LEVEL]",
     onSuccess: () => {
-      return v as Level;
+      result = v as Level;
     },
     onFailure: () => {
-      return undefined;
+      result = undefined;
     },
   });
 
-  // console.warn(`[ts-logkit] Invalid TS_LOGKIT_LEVEL value: "${v}", ignoring.`);
-  // return undefined;
+  return result;
 }
 
 // Apply global toggle
