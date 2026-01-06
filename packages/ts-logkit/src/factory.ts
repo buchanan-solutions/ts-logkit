@@ -1,7 +1,7 @@
 // ./packages/ts-logkit/src/factory.ts
 import { Logger } from "./logger";
 import { Registry } from "./registry";
-import { Config } from "./types/config";
+import { Config, ConfigOverride } from "./types/config";
 
 /**
  * Configuration for creating a logger factory (all Config properties except id, plus optional Registry)
@@ -15,10 +15,7 @@ export type FactoryConfig = Omit<Config, "id"> & {
  * Factory function that creates loggers with a given id
  */
 export interface LoggerFactory {
-  createLogger(
-    id: string,
-    overrides?: { level?: Config["level"]; type?: Config["type"] }
-  ): Logger;
+  createLogger(id: string, runtimeOverrides?: ConfigOverride): Logger;
 }
 
 /**
@@ -56,15 +53,16 @@ export interface LoggerFactory {
  * ```
  */
 export function createLoggerFactory(config: FactoryConfig): LoggerFactory {
-  const { registry, ...runtimeConfig } = config;
+  const { registry, ...factoryDefaultConfig } = config;
 
   const factory: LoggerFactory = {
-    createLogger: (id, overrides) => {
-      const logger = new Logger({
-        id,
-        ...runtimeConfig,
-        ...overrides,
-      });
+    createLogger: (id, runtimeOverrides) => {
+      const resolvedConfig = {
+        ...factoryDefaultConfig,
+        ...runtimeOverrides,
+      };
+
+      const logger = new Logger({ id, ...resolvedConfig });
 
       // Attach factory reference
       (logger as any).factory = factory;

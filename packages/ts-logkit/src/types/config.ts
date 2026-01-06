@@ -23,3 +23,5 @@ export interface Config {
   type?: string;
   factory?: LoggerFactory;
 }
+
+export interface ConfigOverride extends Partial<Config> {}
