@@ -29,7 +29,8 @@
     "lint": "echo \"todo\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:verbose": "vitest run --reporter verbose --globals"
+    "test:verbose": "vitest run --reporter verbose --globals",
+    "combine": "bash C:/users/alexb/scripts/combine-files.sh -p src"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

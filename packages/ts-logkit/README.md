@@ -8,12 +8,43 @@ It favors **clarity, explicitness, and extensibility** over hidden magic, making
 
 ---
 
+## 🚀 Quick Start
+
+Add a .npmrc to your consuming repository to connect @buchanan-solution packge space to github (currently only published to npm.pkg.github not true npm yet):
+
+```bash
+@buchanan-solutions:registry=https://npm.pkg.github.com
+```
+
+Add to project package.json normally:
+
+Manually add to package.json:
+
+```bash
+"@buchanan-solutions/ts-logkit": "0.1.0"
+```
+
+Add with npm:
+
+```bash
+npm install @buchanan-solutions/ts-logkit@0.1.0
+```
+
+Add with pnpm:
+
+```bash
+pnpm add @buchanan-solutions/ts-logkit@0.1.0
+```
+
+---
+
 ## Table of Contents
 
 - [Status](#-status)
 - [What it is](#what-it-is)
 - [What it is not](#what-it-is-not)
 - [Why This Exists](#-why-this-exists)
+- [Client-Side Logging Philosophy](#-client-side-logging-philosophy)
 - [Key Features](#-key-features)
   - [Structured Logger Instances](#structured-logger-instances)
   - [Rich Log Levels](#rich-log-levels)
@@ -103,6 +134,32 @@ The result is a logging layer that scales from:
 - 📦 to SDKs embedded in other systems
 
 …without changing your call sites.
+
+---
+
+## 🎭 Client-Side Logging Philosophy
+
+`ts-logkit` distinguishes between three fundamentally different logging use cases:
+
+### Telemetry & Metrics
+
+- 📊 Aggregated, anonymized usage data
+- 📈 Intended for analytics and monitoring pipelines
+- 🔌 Implemented via transports or hooks (not console output)
+
+### Error & Fatal Logging
+
+- 🚨 Unhandled exceptions and critical failures
+- 🌐 Typically sent to centralized backends (Sentry, APIs, databases)
+- 📋 Structured events with context and optional stack traces
+
+### Developer Flow Logging
+
+- 🐛 Debug- and info-level logs used during development
+- 🔍 Focused on execution flow, component lifecycle, and state
+- ⚙️ Usually disabled or heavily filtered in production
+
+`ts-logkit` intentionally keeps these concerns **separate but composable**, allowing teams to enable only what makes sense per environment.
 
 ---
 
@@ -756,6 +813,25 @@ The core stays neutral; adapters handle specifics.
 ### Why hooks instead of middleware?
 
 Hooks are simpler, safer, and harder to misuse in logging paths.
+
+---
+
+### Why do browser logs show the logger's file instead of the component?
+
+In browser environments, file and line numbers are tied to the function that directly calls `console.*`.
+
+When logging is centralized through a logger wrapper:
+
+- The call site becomes the logger implementation
+- Not the component that invoked `logger.info(...)`
+
+This is a **fundamental browser limitation**—not a bug.
+
+**Design decision:**
+
+`ts-logkit` prioritizes structured events, consistency, and transport flexibility. Perfect call-site preservation is not possible when wrapping `console`.
+
+For cases where file/line visibility is critical during development, direct `console.log(...)` usage is acceptable and expected.
 
 ---
 

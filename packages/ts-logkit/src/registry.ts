@@ -4,6 +4,7 @@ import { Store } from "./types/store";
 import { Level } from "./types/level";
 import { shouldLog } from "./utils/shouldLog";
 import { validateLevelAndWarn } from "./utils/validateLevel";
+import { LoggerNotFoundError } from "./errors/loggerNotFound";
 
 export class Registry {
   // Class-level logging

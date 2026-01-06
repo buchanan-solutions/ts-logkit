@@ -1,9 +1,4 @@
-import { Logger } from "./logger";
-
-export type LoggerLike = Pick<
-  Logger,
-  "trace" | "debug" | "info" | "warn" | "error" | "fatal"
->;
+import { LoggerLike } from "./types/loggerLike";
 
 export const NoopLogger: LoggerLike = {
   trace() {},

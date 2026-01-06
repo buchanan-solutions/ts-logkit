@@ -5,3 +5,4 @@ export * from "./hook";
 export * from "./level";
 export * from "./transport";
 export * from "./store";
+export * from "./loggerLike";
