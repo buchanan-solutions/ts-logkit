@@ -1,5 +1,6 @@
 // ./packages/ts-logkit/src/factory.ts
 import { Logger } from "./logger";
+import { NoopLogger } from "./noop";
 import { Registry } from "./registry";
 import { Config, ConfigOverride } from "./types/config";
 
@@ -9,13 +10,14 @@ import { Config, ConfigOverride } from "./types/config";
 export type FactoryConfig = Omit<Config, "id"> & {
   /** Registry for managing logger lifecycle and dynamic configuration */
   registry?: Registry;
+  logConfig?: Config;
 };
 
 /**
  * Factory function that creates loggers with a given id
  */
 export interface LoggerFactory {
-  createLogger(id: string, runtimeOverrides?: ConfigOverride): Logger;
+  createLogger(id: string, runtimeDefaults?: ConfigOverride): Logger;
 }
 
 /**
@@ -53,14 +55,23 @@ export interface LoggerFactory {
  * ```
  */
 export function createLoggerFactory(config: FactoryConfig): LoggerFactory {
+  const log = config.logConfig ? new Logger(config.logConfig) : NoopLogger;
+
+  log.info("Creating logger factory");
+  log.debug("Factory config", { config });
   const { registry, ...factoryDefaultConfig } = config;
 
   const factory: LoggerFactory = {
-    createLogger: (id, runtimeOverrides) => {
+    createLogger: (id, runtimeDefaults) => {
+      log.info(`Creating logger: ${id}`);
+      log.debug("factoryDefaultConfig", { factoryDefaultConfig });
+      log.debug("runtimeDefaults", { runtimeDefaults });
       const resolvedConfig = {
         ...factoryDefaultConfig,
-        ...runtimeOverrides,
+        ...runtimeDefaults,
       };
+
+      log.debug("resolvedConfig", { resolvedConfig });
 
       const logger = new Logger({ id, ...resolvedConfig });
 
