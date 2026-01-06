@@ -1,6 +1,6 @@
 // src/registry.ts
 import { Logger } from "./logger";
-import { Store } from "./types/store";
+import { Store, SystemConfig } from "./types/store";
 import { Level } from "./types/level";
 import { shouldLog } from "./utils/shouldLog";
 import { validateLevelAndWarn } from "./utils/validateLevel";
@@ -10,9 +10,9 @@ export class Registry {
   // Class-level logging
   private static _log_level: Level = "warn";
 
-  private loggers = new Map<string, Logger>();
-  private store?: Store;
-  private unsubscribe?: () => void;
+  private _loggers = new Map<string, Logger>();
+  private _store?: Store;
+  private _unsubscribe?: () => void;
 
   static get logLevel(): Level {
     return Registry._log_level;
@@ -30,16 +30,104 @@ export class Registry {
     });
   }
 
+  public get store(): Store | undefined {
+    return this._store;
+  }
+
+  get(id: string): Logger {
+    const logger = this._loggers.get(id);
+    if (!logger) {
+      throw new LoggerNotFoundError(id);
+    }
+    return logger;
+  }
+
+  getAll(): Logger[] {
+    return Array.from(this._loggers.values());
+  }
+
+  getMap(): Map<string, Logger> {
+    return this._loggers;
+  }
+
+  /**
+   * Registers a logger in the registry and syncs it with the attached store if available.
+   * When a store is attached, the logger's configuration will be loaded from the store
+   * or persisted to the store if not found.
+   *
+   * @param logger - The logger to register
+   */
+  set(logger: Logger) {
+    // Check if logger already exists and warn if replacing
+    const exists = this._loggers.has(logger.id);
+    if (exists && shouldLog(Registry._log_level, "warn")) {
+      console.warn(
+        `[ts-logkit:Registry] Logger "${logger.id}" already exists, replacing.`
+      );
+    }
+
+    // Add logger to registry
+    this._loggers.set(logger.id, logger);
+
+    // Sync with store if available
+    if (this._store) {
+      this._store
+        .get(logger.id)
+        .then((config) => {
+          // Apply stored configuration to logger
+          if (config.level !== undefined) {
+            logger.setLevel(config.level);
+          }
+        })
+        .catch(() => {
+          // Logger not in store → persist default config
+          void this._store?.set({ id: logger.id, level: logger.level });
+        });
+    }
+  }
+
+  /**
+   * Updates configuration for a logger via the attached store.
+   *
+   * This method expresses intent only. The actual Logger instance is updated
+   * indirectly via the registry's subscription to store changes.
+   *
+   * Responsibility flow:
+   * - Registry.update → writes config to the store
+   * - Store notifies subscribers
+   * - Registry applies the change to the live Logger instance
+   *
+   * @throws {Error} If no store is attached to the registry
+   *
+   * @param id - The ID of the logger to update
+   * @param level - The new log level
+   */
+  update(id: string, level: Level) {
+    // TODO: Change function signature to `update(id: string, patch: Partial<Config || LoggerStoreConfig>)` for future flexibility
+    if (!this._store) {
+      throw new Error("Registry has no store attached");
+    }
+    return this._store.set({ id, level });
+  }
+
+  /**
+   * Delete a logger (e.g. on React component unmount)
+   * @param id - The ID of the logger to delete
+   */
+  delete(id: string) {
+    this._loggers.delete(id);
+  }
+
   attachStore(store: Store) {
     // Clean up existing subscription if any
-    this.unsubscribe?.();
-    this.store = store;
+    this._unsubscribe?.();
+    this._store = store;
 
-    // Initial sync - apply existing configs to registered loggers
+    // Initial sync - apply existing configs to set loggers
     void store.list().then((configs) => {
       for (const cfg of configs) {
-        const logger = this.loggers.get(cfg.id);
-        if (logger && cfg.level !== undefined) {
+        const logger = this._loggers.get(cfg.id);
+        if (logger && cfg.level !== undefined && logger.level !== cfg.level) {
           logger.setLevel(cfg.level);
         }
       }
@@ -47,8 +135,8 @@ export class Registry {
 
     // Single subscription for all loggers
     if (store.subscribeAll) {
-      this.unsubscribe = store.subscribeAll((cfg) => {
-        const logger = this.loggers.get(cfg.id);
+      this._unsubscribe = store.subscribeAll((cfg) => {
+        const logger = this._loggers.get(cfg.id);
         if (logger && cfg.level !== undefined) {
           logger.setLevel(cfg.level);
         }
@@ -56,49 +144,10 @@ export class Registry {
     }
   }
 
-  /**
-   * Register a logger with the registry.
-   * If no registry is provided, loggers are static and cannot be reconfigured.
-   *
-   * @param logger - The logger to register
-   */
-  register(logger: Logger) {
-    if (this.loggers.has(logger.id) && shouldLog(Registry._log_level, "warn")) {
-      console.warn(
-        `[ts-logkit] Logger "${logger.id}" already registered, replacing.`
-      );
-    }
-
-    this.loggers.set(logger.id, logger);
-
-    // If store is already attached, apply initial config for this logger
-    if (this.store) {
-      void this.store.get(logger.id).then(
-        (config) => {
-          if (config.level !== undefined) {
-            logger.setLevel(config.level);
-          }
-        },
-        () => {
-          // Logger not found in store, use defaults - this is fine
-          // Silently ignore to prevent breaking logging
-        }
-      );
-    }
-  }
-
-  /**
-   * Unregister a logger (e.g. on React component unmount)
-   * @param id - The ID of the logger to unregister
-   */
-  unregister(id: string) {
-    this.loggers.delete(id);
-  }
-
   destroy() {
-    this.unsubscribe?.();
-    this.unsubscribe = undefined;
-    this.store = undefined;
-    this.loggers.clear();
+    this._unsubscribe?.();
+    this._unsubscribe = undefined;
+    this._store = undefined;
+    this._loggers.clear();
   }
 }
