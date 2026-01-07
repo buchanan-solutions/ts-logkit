@@ -1,5 +1,24 @@
 # ts-logkit
 
+## 0.2.0
+
+#### Added
+
+- Internal logger added to registry
+- `ConfigOverride` support
+- Registry methods: `get()`, `getAll()`, `store`, `set()`, `update()`, `delete()` (replacing `Register`/`unregister`)
+- Logger.child now works and can spawn new factory instances
+
+#### Changed
+
+- Refactored ts-logkit: server and stores separated for import clarity
+- Fixed global `envLevel` read in `shouldLog` logic
+
+#### Breaking
+
+- Major refactor of registry and logger structure
+- Registry now fully reactive; async/persistence logic removed from Registry
+
 ## 0.1.0
 
 ### Patch Changes
