@@ -1,4 +1,4 @@
-import { LoggerStoreConfig, Store, SystemConfig } from "../types/store";
+import { LoggerStoreConfig, Store, SystemConfig } from "./store";
 /**
  * In-memory logging storage implementation
  */

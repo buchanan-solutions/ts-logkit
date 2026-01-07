@@ -1,4 +1,4 @@
-import { Level } from "./level";
+import { Level } from "../core/types/level";
 
 /**
  * Serializable configuration stored in the store

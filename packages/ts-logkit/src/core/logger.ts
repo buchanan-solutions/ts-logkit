@@ -1,4 +1,4 @@
-// ./packages/ts-logkit/src/logger.ts
+// ./packages/ts-logkit/src/core/logger.ts
 import { Event, Level } from "./types";
 import { Transport } from "./types/transport";
 import { Hook } from "./types/hook";

@@ -2,7 +2,7 @@ import { Level } from "./level";
 import { Transport } from "./transport";
 import { Hook } from "./hook";
 import { Formatter } from "./formatter";
-import { LoggerFactory } from "../factory";
+import type { LoggerFactory } from "../factory";
 
 /**
  * Configuration for a logger

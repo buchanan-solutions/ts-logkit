@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { LoggerStoreConfig, Store, SystemConfig } from "../types/store";
+import { LoggerStoreConfig, Store, SystemConfig } from "./store";
 
 export interface FileSystemStoreOptions {
   /** Path to the JSON file where logger configs are stored */

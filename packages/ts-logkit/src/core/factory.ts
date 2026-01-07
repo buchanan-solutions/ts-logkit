@@ -1,7 +1,7 @@
-// ./packages/ts-logkit/src/factory.ts
+// ./packages/ts-logkit/src/core/factory.ts
 import { Logger } from "./logger";
 import { NoopLogger } from "./noop";
-import { Registry } from "./registry";
+import { Registry } from "../registry/registry";
 import { Config, ConfigOverride } from "./types/config";
 
 /**
@@ -78,8 +78,8 @@ export function createLoggerFactory(config: FactoryConfig): LoggerFactory {
       // Attach factory reference
       (logger as any).factory = factory;
 
-      // Set in registry if provided
-      registry?.set(logger);
+      // Register in registry if provided
+      registry?.register(logger);
       return logger;
     },
   };

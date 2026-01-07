@@ -1,13 +1,26 @@
-export * from "./init";
+// Core exports (top-level imports)
+export { Logger, createLoggerFactory } from "./core";
+export type { LoggerFactory, FactoryConfig } from "./core";
 
-export { Logger } from "./logger";
-export * from "./factory";
-export * from "./noop";
-export * from "./transports";
-export * from "./formatters";
-export * from "./types";
-export { Global } from "./global";
-export { Registry } from "./registry";
-export { LoggerNotFoundError } from "./errors/loggerNotFound";
-export * from "./stores";
-export * from "./utils";
+// Registry exports
+export { Registry } from "./registry/registry";
+
+// Storage exports
+export { InMemoryStore } from "./storage";
+export type { Store, LoggerStoreConfig, SystemConfig } from "./storage";
+
+// Additional core utilities
+export { Global, setInternalLogLevel } from "./core";
+export { NoopLogger } from "./core";
+export * from "./core/formatters";
+export * from "./core/transports";
+export * from "./core/types";
+
+// CRITICAL: Do NOT export internal utils via wildcard
+// Only export specific public utilities if needed
+export { validateLevel } from "./core/utils/validateLevel";
+
+export { LoggerNotFoundError } from "./core/errors/loggerNotFound";
+
+// Init (side-effect import)
+export * from "./core/init";

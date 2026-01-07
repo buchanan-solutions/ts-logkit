@@ -1,5 +1,5 @@
-import { Registry } from "./registry";
-import { Level } from "./types";
+import { Registry } from "../registry/registry";
+import { Level } from "./types/level";
 import { validateLevelAndWarn } from "./utils/validateLevel";
 
 export class Global {
