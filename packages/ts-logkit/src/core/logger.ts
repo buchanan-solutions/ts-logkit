@@ -71,28 +71,27 @@ export class Logger {
 
   private async emit(event: Event) {
     if (!Global.enabled) return;
-    if (!this.shouldLog(event.level)) return;
 
-    // Send the full event to all transports
-    // Transports can format it themselves or use their own formatters
-    for (const transport of this._transports) {
-      transport.log(event, this._formatter);
-    }
+    // This is the actual work of logging
+    const dispatch = (ev: Event) => {
+      // 1. Level Check (Check against the LATEST level at the time of dispatch)
+      if (!this.shouldLog(ev.level)) return;
 
-    // Execute hooks with the original event (hooks may need raw event data)
-    // Support both sync and async hooks
-    if (this._hooks) {
-      for (const hook of this._hooks) {
-        const result = hook.onLog(event);
-        // If hook returns a promise, await it (but don't block other hooks)
-        if (result instanceof Promise) {
-          result.catch((err) => {
-            // Silently handle hook errors to prevent breaking logging
-            console.error("Hook error:", err);
-          });
+      // 2. Transports
+      for (const transport of this._transports) {
+        transport.log(ev, this._formatter);
+      }
+
+      // 3. Hooks
+      if (this._hooks) {
+        for (const hook of this._hooks) {
+          const result = hook.onLog(ev);
+          if (result instanceof Promise) {
+            result.catch((err) => console.error("Hook error:", err));
+          }
         }
       }
-    }
+    };
   }
 
   /**

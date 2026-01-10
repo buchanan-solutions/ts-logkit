@@ -3,6 +3,7 @@ import { Logger } from "./logger";
 import { NoopLogger } from "./noop";
 import { Registry } from "../registry/registry";
 import { Config, ConfigOverride } from "./types/config";
+import { LoggerNotFoundError } from "../registry";
 
 /**
  * Configuration for creating a logger factory (all Config properties except id, plus optional Registry)
@@ -73,13 +74,27 @@ export function createLoggerFactory(config: FactoryConfig): LoggerFactory {
 
       log.debug("resolvedConfig", { resolvedConfig });
 
+      // 1. Try to get existing logger from registry (same instance)
+      let existingLogger: Logger | undefined;
+      try {
+        existingLogger = registry?.get(id);
+        if (existingLogger) {
+          return existingLogger;
+        }
+      } catch (error) {
+        if (error instanceof LoggerNotFoundError) {
+          log.warn("Logger not found in registry, creating new one", id);
+        } else {
+          log.error("Error getting logger from registry", { error, id });
+          throw error;
+        }
+      }
+
+      // 2. Logger wasn't found, create anew and register
       const logger = new Logger({ id, ...resolvedConfig });
-
-      // Attach factory reference
-      (logger as any).factory = factory;
-
-      // Register in registry if provided
+      (logger as any).factory = factory; // Attach factory to logger for logger.child() calls to use same factory
       registry?.register(logger);
+
       return logger;
     },
   };

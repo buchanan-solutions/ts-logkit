@@ -16,8 +16,12 @@ export function formatDev(event: Event): FormattedOutput {
   // const time = new Date(event.timestamp).toISOString();
   const levelLabel = event.level.toUpperCase();
 
+  const isClient = typeof window !== "undefined";
+
   const parts: unknown[] = [
-    `(${event.logger_id}) ${color}[${levelLabel}]${RESET} \t${event.message}`,
+    `(${isClient ? "~" : ""}${
+      event.logger_id
+    }) ${color}[${levelLabel}]${RESET} \t${event.message}`,
     ...(event.args ?? []),
     ...(event.error ? [event.error] : []),
   ];
