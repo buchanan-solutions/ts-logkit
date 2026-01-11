@@ -1,5 +1,46 @@
 # ts-logkit
 
+## 0.3.0
+
+This release introduces a major architectural shift in how configurations are managed. By moving from an "Attach" model to a "Bootstrap" model, `ts-logkit` now supports fully synchronous logger creation with immediate access to persisted configurations, eliminating hydration race conditions.
+
+---
+
+### 🚀 Major Changes & Features
+
+- **Registry Bootstrap Pattern**: Replaced `attachStore()` with an asynchronous `bootstrap()` method.
+- **Synchronous Configuration**: `bootstrap()` loads all store configurations into a local memory cache.
+- **Zero-Latency Creation**: Loggers created via the factory now resolve their log levels synchronously from the cache, ensuring they start at the correct level from the first byte of code.
+
+- **Performance Optimization**: Refactored the internal `emit` cycle to flatten the dispatch logic and improve "fire-and-forget" hook execution.
+- **Client-Side Awareness**: The Dev Formatter now detects browser environments (`window`) and adds a visual marker (`~`) to logger IDs to distinguish client-side logs in unified streams.
+
+### 🛠 Refactors & Improvements
+
+- **Store Naming Convention**: Renamed the `/storage` directory and exports to `/stores` for better alignment with modern state-management terminology.
+- **Improved Registry Error Handling**:
+- `get()` now throws a `LoggerNotFoundError` with clearer diagnostic warnings.
+- `register()` is now idempotent and handles hydration asynchronously if a new logger is introduced post-bootstrap.
+
+- **Type Safety**:
+- Updated `LoggerFactory` to return `LoggerLike` interfaces.
+- Added `NoopLoggerFactory` to support safe "logging disabled" states in consumer applications.
+
+- **Idempotency Strategy**: When a logger is registered that doesn't exist in the store, the registry now automatically persists the runtime default to the store to ensure "discovery" of all loggers.
+
+### 🐛 Bug Fixes
+
+- **Async/Sync Friction**: Fixed a race condition where logs emitted immediately after logger creation would use default levels instead of stored levels.
+- **Internal Logging**: Cleaned up registry-level debug/info logs to be less intrusive during high-frequency registration events.
+
+---
+
+### ⚠️ Breaking Changes
+
+1. **Registry Initialization**: You must now `await registry.bootstrap(store)` before calling `factory.createLogger()` if you rely on persisted log levels.
+2. **Import Paths**: Any imports from `@buchanan-solutions/ts-logkit/storage` must be updated to `@buchanan-solutions/ts-logkit/stores`.
+3. **Factory Output**: `createLogger` now returns a `LoggerLike` type; if you are using TypeScript and accessing internal class properties, an explicit cast to `Logger` may be required.
+
 ## 0.2.0
 
 #### Added

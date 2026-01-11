@@ -39,3 +39,4 @@ pnpm-debug.log*
 
 # Combined text files
 **/combined.txt
+**/git_audit.txt
