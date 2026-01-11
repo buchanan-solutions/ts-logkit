@@ -9,6 +9,7 @@ import { Global } from "./global";
 import { LEVELS } from "./types/level";
 import { LoggerFactory } from "./factory";
 import { validateLevelAndWarn } from "./utils/validateLevel";
+import { LoggerLike } from "./types/loggerLike";
 
 export class Logger {
   private _id: string;
@@ -72,26 +73,23 @@ export class Logger {
   private async emit(event: Event) {
     if (!Global.enabled) return;
 
-    // This is the actual work of logging
-    const dispatch = (ev: Event) => {
-      // 1. Level Check (Check against the LATEST level at the time of dispatch)
-      if (!this.shouldLog(ev.level)) return;
+    // 1. Level Check (Against both local and global)
+    if (!this.shouldLog(event.level)) return;
 
-      // 2. Transports
-      for (const transport of this._transports) {
-        transport.log(ev, this._formatter);
-      }
+    // 2. Transports
+    for (const transport of this._transports) {
+      transport.log(event, this._formatter);
+    }
 
-      // 3. Hooks
-      if (this._hooks) {
-        for (const hook of this._hooks) {
-          const result = hook.onLog(ev);
-          if (result instanceof Promise) {
-            result.catch((err) => console.error("Hook error:", err));
-          }
+    // 3. Hooks (Fire and forget, don't await)
+    if (this._hooks) {
+      for (const hook of this._hooks) {
+        const result = hook.onLog(event);
+        if (result instanceof Promise) {
+          result.catch((err) => console.error("Hook error:", err));
         }
       }
-    };
+    }
   }
 
   /**
@@ -110,14 +108,14 @@ export class Logger {
       type: opts?.type ?? this._type,
     };
 
-    let newLogger: Logger;
+    let newLogger: LoggerLike;
     if (this._factory) {
       newLogger = this._factory.createLogger(fullId, newConfig);
     } else {
       newLogger = new Logger(newConfig);
     }
 
-    return newLogger;
+    return newLogger as Logger;
   }
 
   trace(message: string, ...args: unknown[]) {

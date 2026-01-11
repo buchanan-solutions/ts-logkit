@@ -1,6 +1,6 @@
 // packages/ts-logkit/src/registry/registry.ts
 import { Logger } from "../core/logger";
-import { Store } from "../storage/store";
+import { Store } from "../stores/store";
 import { Level } from "../core/types/level";
 import { validateLevelAndWarn } from "../core/utils/validateLevel";
 import { LoggerNotFoundError } from "../core/errors/loggerNotFound";
@@ -13,6 +13,7 @@ export class Registry {
   private static _log_level: Level = "warn";
 
   private _loggers = new Map<string, Logger>();
+  private _configCache = new Map<string, Level>();
   private _store?: Store;
   private _unsubscribe?: () => void;
 
@@ -42,11 +43,25 @@ export class Registry {
   }
 
   /**
-   * Attach a store and synchronize existing loggers.
-   * This handles the transition from "buffering" to "live" logging.
+   * Bootstrap the registry by loading all configurations from the store into a local cache.
+   * This must be called before creating loggers to ensure synchronous configuration access.
+   *
+   * This method:
+   * 1. Loads all configs from the store via `store.list()`
+   * 2. Populates the internal `_configCache` for synchronous access
+   * 3. Applies cached levels to any existing loggers
+   * 4. Sets up reactive subscription for runtime store changes
+   *
+   * @param store - The store to bootstrap from
+   * @example
+   * ```ts
+   * const registry = new Registry();
+   * await registry.bootstrap(myStore);
+   * // Now all logger creation is synchronous
+   * ```
    */
-  async attachStore(store: Store): Promise<void> {
-    this._log.info("Attaching store to registry");
+  async bootstrap(store: Store): Promise<void> {
+    this._log.info("Bootstrapping registry from store");
 
     if (this._unsubscribe) {
       this._log.debug("Cleaning up existing store subscription");
@@ -55,23 +70,41 @@ export class Registry {
 
     this._store = store;
 
-    // 1. Initial Sync: Hydrate every logger that was created before the store was ready.
-    // We use Promise.all to do this in parallel.
+    // 1. Load all configs from store and populate cache
+    const configs = await store.list();
+    configs.forEach((cfg) => {
+      if (cfg.level) {
+        this._configCache.set(cfg.id, cfg.level as Level);
+      }
+    });
+    this._log.info(`Loaded ${configs.length} configurations into cache`);
+
+    // 2. Apply cached levels to any existing loggers synchronously
     const activeLoggers = Array.from(this._loggers.values());
     if (activeLoggers.length > 0) {
-      this._log.info(`Hydrating ${activeLoggers.length} existing loggers...`);
-      await Promise.all(
-        activeLoggers.map((logger) => this.hydrateLogger(logger))
+      this._log.info(
+        `Applying cached levels to ${activeLoggers.length} existing loggers...`
       );
+      activeLoggers.forEach((logger) => {
+        const cachedLevel = this._configCache.get(logger.id);
+        if (cachedLevel) {
+          logger.setLevel(cachedLevel);
+          this._log.debug("Applied cached level to logger", {
+            id: logger.id,
+            level: cachedLevel,
+          });
+        }
+      });
     }
-
-    // 2. RELEASE THE BUFFER: Now that loggers have their store-configs,
-    // we flush all logs that were waiting in the chronological queue.
-    this._log.debug("Hydration complete. Flushing diagnostic buffer.");
 
     // 3. Setup Reactive Subscription for future store changes
     if (store.subscribeAll) {
       this._unsubscribe = store.subscribeAll((cfg) => {
+        // Update cache when store changes
+        if (cfg.level !== undefined) {
+          this._configCache.set(cfg.id, cfg.level as Level);
+        }
+        // Update logger instance if it exists
         const logger = this._loggers.get(cfg.id);
         if (logger && cfg.level !== undefined && cfg.level !== logger.level) {
           this._log.debug("Store reactive update", {
@@ -84,55 +117,45 @@ export class Registry {
     }
   }
 
-  private async hydrateLogger(logger: Logger) {
-    try {
-      const storedCfg = await this._store?.get(logger.id);
-      if (storedCfg?.level) {
-        logger.setLevel(storedCfg.level as Level);
-        this._log.debug("Hydrated from store", {
-          id: logger.id,
-          level: storedCfg.level,
-        });
-      } else {
-        // IDEMPOTENCY: If store doesn't have it, write the runtime default to the store
-        // so the store becomes populated with all file-level loggers automatically.
-        await this._store?.set({ id: logger.id, level: logger.level });
-      }
-    } catch (err) {
-      // Logger not in store yet or store unreachable - keep defaults
-    }
-  }
-
   /**
    * Register a logger in the registry.
    *
-   * This method is synchronous and will block the main thread until the logger is registered.
-   *
-   * The logger is registered in the registry and the store is hydrated asynchronously.
+   * This method is fully synchronous and reads from the local config cache.
+   * If the logger's configuration exists in the cache (from bootstrap), it is applied immediately.
+   * If not, and a store is attached, the logger's current level is persisted to the store.
    *
    * @param logger - The logger to register
    */
   register(logger: Logger): void {
     this._loggers.set(logger.id, logger);
-    this._log.info("Logger registered (sync)", { id: logger.id });
+    this._log.info("Logger registered", { id: logger.id });
 
-    // Asynchronous hydration (fire and forget)
-    if (this._store) {
-      this._log.info("Hydrating logger from store (async)", { id: logger.id });
-      this.hydrateLogger(logger);
+    // Synchronous hydration from cache
+    const cachedLevel = this._configCache.get(logger.id);
+    if (cachedLevel) {
+      logger.setLevel(cachedLevel);
+      this._log.debug("Applied cached level to logger", {
+        id: logger.id,
+        level: cachedLevel,
+      });
+    } else if (this._store) {
+      // New logger - persist to store (fire-and-forget)
+      this._log.debug("Persisting new logger to store", {
+        id: logger.id,
+        level: logger.level,
+      });
+      void this._store.set({ id: logger.id, level: logger.level });
     }
   }
 
   /**
-   * Updates configuration for a logger via the attached store.
+   * Updates configuration for a logger.
    *
-   * This method expresses intent only. The actual Logger instance is updated
-   * indirectly via the registry's subscription to store changes.
+   * This method updates the cache and logger instance immediately (synchronous),
+   * then pushes the update to the store asynchronously (fire-and-forget).
    *
    * Responsibility flow:
-   * - Registry.update → writes config to the store
-   * - Store notifies subscribers
-   * - Registry applies the change to the live Logger instance
+   * - Registry.update → updates cache (sync) → updates logger (sync) → pushes to store (async)
    *
    * @throws {Error} If no store is attached to the registry
    *
@@ -151,13 +174,28 @@ export class Registry {
       });
       throw new Error("Registry has no store attached");
     }
-    const currentLogger = this._loggers.get(id);
-    this._log.debug("Writing config to store", {
+
+    // 1. Update cache (synchronous)
+    this._configCache.set(id, level);
+
+    // 2. Update logger instance (synchronous)
+    const logger = this._loggers.get(id);
+    if (logger) {
+      const previousLevel = logger.level;
+      logger.setLevel(level);
+      this._log.debug("Updated logger level", {
+        loggerId: id,
+        level,
+        previousLevel,
+      });
+    }
+
+    // 3. Push to store (async fire-and-forget)
+    this._log.debug("Pushing config to store", {
       loggerId: id,
       level,
-      currentLevel: currentLogger?.level,
     });
-    return this._store.set({ id, level });
+    void this._store.set({ id, level });
   }
 
   /**
@@ -215,44 +253,6 @@ export class Registry {
     return this._loggers;
   }
 
-  /**
-   * Register a logger instance in the registry.
-   *
-   * **Important for SPA applications:**
-   * - Always pair register() with unregister() in component cleanup
-   * - Registry is a singleton - loggers persist across route changes
-   * - Unregistered loggers will never be garbage collected
-   *
-   * This method is idempotent - safe to call multiple times with the same logger ID.
-   * Handles race conditions gracefully when multiple components register the same logger simultaneously.
-   *
-   * @param logger - The logger instance to register
-   * @example
-   * ```ts
-   * useEffect(() => {
-   *   const logger = factory.createLogger("MyComponent");
-   *   registry.register(logger);
-   *   return () => registry.unregister("MyComponent");
-   * }, []);
-   * ```
-   */
-  // register(logger: Logger): void {
-  //   const existing = this._loggers.get(logger.id);
-  //   const isReplacement = existing !== undefined;
-
-  //   // Idempotent operation - safe to overwrite
-  //   this._loggers.set(logger.id, logger);
-
-  //   if (isReplacement) {
-  //     this._log.debug("Logger replaced", { loggerId: logger.id });
-  //   } else {
-  //     this._log.info("Logger registered", {
-  //       loggerId: logger.id,
-  //       level: logger.level,
-  //     });
-  //   }
-  // }
-
   destroy() {
     this._log.info("Destroying registry");
     const loggerCount = this._loggers.size;
@@ -265,6 +265,7 @@ export class Registry {
 
     this._store = undefined;
     this._loggers.clear();
+    this._configCache.clear();
 
     this._log.debug("Registry destroyed", { loggerCount });
   }

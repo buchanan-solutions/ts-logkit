@@ -4,6 +4,7 @@ import { NoopLogger } from "./noop";
 import { Registry } from "../registry/registry";
 import { Config, ConfigOverride } from "./types/config";
 import { LoggerNotFoundError } from "../registry";
+import { LoggerLike } from "./types/loggerLike";
 
 /**
  * Configuration for creating a logger factory (all Config properties except id, plus optional Registry)
@@ -18,7 +19,7 @@ export type FactoryConfig = Omit<Config, "id"> & {
  * Factory function that creates loggers with a given id
  */
 export interface LoggerFactory {
-  createLogger(id: string, runtimeDefaults?: ConfigOverride): Logger;
+  createLogger(id: string, runtimeDefaults?: ConfigOverride): LoggerLike;
 }
 
 /**
@@ -49,8 +50,8 @@ export interface LoggerFactory {
  *   registry
  * });
  *
- * // Attach store to registry (optional)
- * registry.attachStore(myStore);
+ * // Bootstrap registry with store (must be awaited before creating loggers)
+ * await registry.bootstrap(myStore);
  *
  * const logger = factory.createLogger("my-logger");
  * ```
@@ -101,3 +102,9 @@ export function createLoggerFactory(config: FactoryConfig): LoggerFactory {
 
   return factory;
 }
+
+export const NoopLoggerFactory: LoggerFactory = {
+  createLogger: (id: string, runtimeDefaults?: ConfigOverride): LoggerLike => {
+    return NoopLogger;
+  },
+};

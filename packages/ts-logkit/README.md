@@ -447,7 +447,9 @@ A `Registry` manages logger lifecycle and applies store configurations to regist
 ```ts
 const registry = new Registry();
 const store = new InMemoryStore();
-registry.attachStore(store);
+
+// Bootstrap registry with store (must be awaited before creating loggers)
+await registry.bootstrap(store);
 
 const factory = createLoggerFactory({
   // ... config
@@ -457,9 +459,12 @@ const factory = createLoggerFactory({
 
 The registry automatically:
 
-- Applies store configurations to registered loggers
+- Loads all store configurations into a local cache during bootstrap
+- Applies cached configurations to registered loggers synchronously
 - Subscribes to store updates and updates loggers in real-time
 - Manages logger lifecycle (register/unregister)
+
+**Bootstrap Pattern:** The `bootstrap()` method loads all configurations from the store into a local cache, enabling fully synchronous logger creation. This eliminates async/sync friction and ensures loggers start with the correct level immediately.
 
 ---
 
@@ -612,8 +617,8 @@ import {
 const registry = new Registry();
 const store = new InMemoryStore();
 
-// Attach store to registry for persistence
-registry.attachStore(store);
+// Bootstrap registry with store (must be awaited before creating loggers)
+await registry.bootstrap(store);
 
 const factory = createLoggerFactory({
   transports: [createConsoleTransport()],
@@ -654,8 +659,8 @@ import {
 const registry = new Registry();
 const store = new InMemoryStore();
 
-// Attach store to registry
-registry.attachStore(store);
+// Bootstrap registry with store (must be awaited before creating loggers)
+await registry.bootstrap(store);
 
 // Create factory with registry
 const factory = createLoggerFactory({
@@ -665,7 +670,7 @@ const factory = createLoggerFactory({
   registry, // Registry will manage loggers and apply store configs
 });
 
-// Create logger - it will be automatically registered
+// Create logger - it will be automatically registered with cached config
 const logger = factory.createLogger("my-service");
 
 // Later, update log level dynamically via store
