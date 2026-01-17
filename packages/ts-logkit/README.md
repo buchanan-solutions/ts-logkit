@@ -75,6 +75,7 @@ pnpm add @buchanan-solutions/ts-logkit@0.1.0
   - [Multiple Transports](#multiple-transports)
   - [Custom Formatter](#custom-formatter)
   - [Hooks for Telemetry](#hooks-for-telemetry)
+  - [Testing Utilities](#testing-utilities)
 - [Roadmap](#-roadmap)
 - [FAQ / Design Notes](#-faq--design-notes)
 - [License](#-license)
@@ -784,6 +785,61 @@ const hook = {
   },
 };
 ```
+
+---
+
+### Testing Utilities
+
+`ts-logkit` provides testing utilities to help you test code that depends on loggers. The testing module is split into generic utilities and framework-specific implementations.
+
+#### Generic Testing Utilities
+
+The main testing module (`@buchanan-solutions/ts-logkit/testing`) provides framework-agnostic testing utilities:
+
+**`createSpyableLogger()`**
+
+Creates a mock logger that implements the `LoggerLike` interface and tracks all log calls internally. Useful for testing code that accepts logger dependencies.
+
+```ts
+import { createSpyableLogger } from "@buchanan-solutions/ts-logkit/testing";
+
+const mockLogger = createSpyableLogger();
+
+// Use in your tests
+myFunction(mockLogger);
+
+// The logger tracks calls internally
+// (Access to call history depends on your testing framework)
+```
+
+#### Vitest-Specific Testing Utilities
+
+For Vitest users, the `@buchanan-solutions/ts-logkit/testing/vitest` module provides enhanced spyable loggers that integrate with Vitest's mocking system:
+
+**`createVitestSpyableLogger()`**
+
+Creates a spyable logger with all methods wrapped in `vi.fn()`, enabling full Vitest spy assertions:
+
+```ts
+import { createVitestSpyableLogger } from "@buchanan-solutions/ts-logkit/testing/vitest";
+
+const mockLogger = createVitestSpyableLogger();
+
+// Use in your tests
+myFunction(mockLogger);
+
+// Assert with Vitest spy methods
+expect(mockLogger.info).toHaveBeenCalledWith("Expected message");
+expect(mockLogger.error).toHaveBeenCalledTimes(1);
+expect(mockLogger.warn).not.toHaveBeenCalled();
+```
+
+**Benefits:**
+
+- ✅ Full `LoggerLike` interface compliance
+- ✅ All log levels (`trace`, `debug`, `info`, `warn`, `error`, `fatal`) are spyable
+- ✅ Framework-agnostic core with framework-specific extensions
+- ✅ Easy to extend with additional testing utilities
 
 ---
 

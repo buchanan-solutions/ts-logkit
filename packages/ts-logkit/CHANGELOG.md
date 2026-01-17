@@ -1,5 +1,15 @@
 # ts-logkit
 
+## 0.3.1
+
+### Patch Changes
+
+- add mock loggers with vitest optional peer dep (for documentation that this dep exists at some layer - see README.md)
+
+#### Developer Changes
+
+- added tsup.config.ts for easier build config management
+
 ## 0.3.0
 
 This release introduces a major architectural shift in how configurations are managed. By moving from an "Attach" model to a "Bootstrap" model, `ts-logkit` now supports fully synchronous logger creation with immediate access to persisted configurations, eliminating hydration race conditions.
