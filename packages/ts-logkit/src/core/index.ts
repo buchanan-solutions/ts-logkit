@@ -13,3 +13,4 @@ export * from "./types";
 // Only export public utils - internal utilities (shouldLog, splitError) are NOT exported
 export { validateLevel } from "./utils/validateLevel";
 export { LoggerNotFoundError } from "./errors/loggerNotFound";
+export { Loggable } from "./loggable";
