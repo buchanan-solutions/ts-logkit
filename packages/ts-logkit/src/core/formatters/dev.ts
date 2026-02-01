@@ -1,6 +1,6 @@
 import { Event, Formatter, FormattedOutput } from "../types";
 
-const ANSI_COLORS = {
+export const ANSI_COLORS = {
   trace: "\x1b[90m",
   debug: "\x1b[36m",
   info: "\x1b[32m",
