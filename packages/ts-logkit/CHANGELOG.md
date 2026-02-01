@@ -1,5 +1,11 @@
 # ts-logkit
 
+## 0.3.3
+
+### Patch Changes
+
+- forgot to commit package.json with new version in 0.3.2
+
 ## 0.3.2
 
 ### Patch Changes
