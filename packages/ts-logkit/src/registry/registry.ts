@@ -1,21 +1,32 @@
-// packages/ts-logkit/src/registry/registry.ts
 import { Logger } from "../core/logger";
-import { Store } from "../stores/store";
-import { Level } from "../core/types/level";
+import { type Store } from "../stores/store";
+import {
+  type Level,
+  type ConfiguredLevel,
+  NOTSET,
+  ancestorIds,
+} from "../core/types/level";
 import { validateLevelAndWarn } from "../core/utils/validateLevel";
 import { LoggerNotFoundError } from "../core/errors/loggerNotFound";
 import type { LoggerLike } from "../core/types/loggerLike";
 import type { Config } from "../core/types/config";
 import { NoopLogger } from "../core/noop";
 
+/** Inspect row for UIs: configured pin vs resolved effective severity. */
+export interface LoggerLevelInfo {
+  id: string;
+  configured: ConfiguredLevel;
+  effective: Level;
+}
+
 export class Registry {
-  // Class-level logging
   private static _log_level: Level = "warn";
 
   private _loggers = new Map<string, Logger>();
   private _configCache = new Map<string, Level>();
   private _store?: Store;
   private _unsubscribe?: () => void;
+  private _defaultLevel: Level = "warn";
 
   private _log: LoggerLike;
 
@@ -23,7 +34,6 @@ export class Registry {
     return Registry._log_level;
   }
   static set logLevel(level: Level) {
-    // Leave warn = true here so it always warns on failure (as this governs other class-level warnings)
     validateLevelAndWarn(level, {
       qualifier: "Registry.logLevel",
       onSuccess: () => {
@@ -38,27 +48,25 @@ export class Registry {
   public get store(): Store | undefined {
     return this._store;
   }
+
+  /**
+   * Process fallback used when an id's ancestor chain is all NOTSET.
+   * Set from the factory default (LOG_LEVEL) so inspect/effective stay coherent.
+   */
+  get defaultLevel(): Level {
+    return this._defaultLevel;
+  }
+  set defaultLevel(level: Level) {
+    this._defaultLevel = level;
+  }
+
   constructor(logConfig?: Config) {
     this._log = logConfig ? new Logger(logConfig) : NoopLogger;
   }
 
   /**
    * Bootstrap the registry by loading all configurations from the store into a local cache.
-   * This must be called before creating loggers to ensure synchronous configuration access.
-   *
-   * This method:
-   * 1. Loads all configs from the store via `store.list()`
-   * 2. Populates the internal `_configCache` for synchronous access
-   * 3. Applies cached levels to any existing loggers
-   * 4. Sets up reactive subscription for runtime store changes
-   *
-   * @param store - The store to bootstrap from
-   * @example
-   * ```ts
-   * const registry = new Registry();
-   * await registry.bootstrap(myStore);
-   * // Now all logger creation is synchronous
-   * ```
+   * Must be called before creating loggers that rely on persisted explicit levels.
    */
   async bootstrap(store: Store): Promise<void> {
     this._log.info("Bootstrapping registry from store");
@@ -70,8 +78,8 @@ export class Registry {
 
     this._store = store;
 
-    // 1. Load all configs from store and populate cache
     const configs = await store.list();
+    this._configCache.clear();
     configs.forEach((cfg) => {
       if (cfg.level) {
         this._configCache.set(cfg.id, cfg.level as Level);
@@ -79,7 +87,6 @@ export class Registry {
     });
     this._log.info(`Loaded ${configs.length} configurations into cache`);
 
-    // 2. Apply cached levels to any existing loggers synchronously
     const activeLoggers = Array.from(this._loggers.values());
     if (activeLoggers.length > 0) {
       this._log.info(
@@ -97,40 +104,58 @@ export class Registry {
       });
     }
 
-    // 3. Setup Reactive Subscription for future store changes
     if (store.subscribeAll) {
       this._unsubscribe = store.subscribeAll((cfg) => {
-        // Update cache when store changes
         if (cfg.level !== undefined) {
           this._configCache.set(cfg.id, cfg.level as Level);
-        }
-        // Update logger instance if it exists
-        const logger = this._loggers.get(cfg.id);
-        if (logger && cfg.level !== undefined && cfg.level !== logger.level) {
-          this._log.debug("Store reactive update", {
-            id: cfg.id,
-            level: cfg.level,
-          });
-          logger.setLevel(cfg.level as Level);
+          const logger = this._loggers.get(cfg.id);
+          if (logger && cfg.level !== logger.configuredLevel) {
+            this._log.debug("Store reactive update", {
+              id: cfg.id,
+              level: cfg.level,
+            });
+            logger.setLevel(cfg.level as Level);
+          }
         }
       });
     }
   }
 
   /**
-   * Register a logger in the registry.
-   *
-   * This method is fully synchronous and reads from the local config cache.
-   * If the logger's configuration exists in the cache (from bootstrap), it is applied immediately.
-   * If not, and a store is attached, the logger's current level is persisted to the store.
-   *
-   * @param logger - The logger to register
+   * Looks up configured level for an id from live instance or cache only (never Store).
+   * Missing → NOTSET.
+   */
+  lookupConfigured(id: string): ConfiguredLevel {
+    const live = this._loggers.get(id);
+    if (live) {
+      return live.configuredLevel;
+    }
+    const cached = this._configCache.get(id);
+    return cached ?? NOTSET;
+  }
+
+  /**
+   * Walks dotted ancestors for the first non-NOTSET configured level, else factory default.
+   * Sync; must not touch the Store (hot path for shouldLog).
+   */
+  getEffectiveLevel(id: string): Level {
+    for (const ancestor of ancestorIds(id)) {
+      const configured = this.lookupConfigured(ancestor);
+      if (configured !== NOTSET) {
+        return configured;
+      }
+    }
+    return this._defaultLevel;
+  }
+
+  /**
+   * Register a logger. Hydrates explicit level from cache only.
+   * Does not persist NOTSET (or any level) to the store — use `update` for that.
    */
   register(logger: Logger): void {
     this._loggers.set(logger.id, logger);
     this._log.info("Logger registered", { id: logger.id });
 
-    // Synchronous hydration from cache
     const cachedLevel = this._configCache.get(logger.id);
     if (cachedLevel) {
       logger.setLevel(cachedLevel);
@@ -138,32 +163,14 @@ export class Registry {
         id: logger.id,
         level: cachedLevel,
       });
-    } else if (this._store) {
-      // New logger - persist to store (fire-and-forget)
-      this._log.debug("Persisting new logger to store", {
-        id: logger.id,
-        level: logger.level,
-      });
-      void this._store.set({ id: logger.id, level: logger.level });
     }
   }
 
   /**
-   * Updates configuration for a logger.
-   *
-   * This method updates the cache and logger instance immediately (synchronous),
-   * then pushes the update to the store asynchronously (fire-and-forget).
-   *
-   * Responsibility flow:
-   * - Registry.update → updates cache (sync) → updates logger (sync) → pushes to store (async)
-   *
-   * @throws {Error} If no store is attached to the registry
-   *
-   * @param id - The ID of the logger to update
-   * @param level - The new log level
+   * Pins an explicit severity on exact `id` only (cache + live + store). No cascade.
+   * @throws {Error} If no store is attached
    */
   update(id: string, level: Level) {
-    // TODO: Change function signature to `update(id: string, patch: Partial<Config || LoggerStoreConfig>)` for future flexibility
     this._log.info("Updating logger configuration", {
       loggerId: id,
       newLevel: level,
@@ -175,36 +182,81 @@ export class Registry {
       throw new Error("Registry has no store attached");
     }
 
-    // 1. Update cache (synchronous)
-    this._configCache.set(id, level);
+    validateLevelAndWarn(level, {
+      qualifier: "Registry.update",
+      onSuccess: () => {
+        this._configCache.set(id, level);
 
-    // 2. Update logger instance (synchronous)
-    const logger = this._loggers.get(id);
-    if (logger) {
-      const previousLevel = logger.level;
-      logger.setLevel(level);
-      this._log.debug("Updated logger level", {
-        loggerId: id,
-        level,
-        previousLevel,
-      });
-    }
+        const logger = this._loggers.get(id);
+        if (logger) {
+          const previousConfigured = logger.configuredLevel;
+          logger.setLevel(level);
+          this._log.debug("Updated logger level", {
+            loggerId: id,
+            level,
+            previousConfigured,
+          });
+        }
 
-    // 3. Push to store (async fire-and-forget)
-    this._log.debug("Pushing config to store", {
-      loggerId: id,
-      level,
+        void this._store!.set({ id, level });
+      },
+      onFailure: () => {
+        return;
+      },
     });
-    void this._store.set({ id, level });
   }
 
   /**
-   * Unregister a logger from the registry.
-   *
-   * **CRITICAL**: Must be called on component unmount to prevent memory leaks.
-   * Safe to call even if logger doesn't exist (idempotent).
-   *
-   * @param id - The logger ID to unregister
+   * Clears the pin for `id` → NOTSET, drops cache entry, removes store row.
+   * Descendants that were NOTSET resume walking to the next ancestor.
+   * @throws {Error} If no store is attached
+   */
+  unset(id: string): void {
+    this._log.info("Unsetting logger configuration", { loggerId: id });
+    if (!this._store) {
+      this._log.error("Cannot unset logger: no store attached", {
+        loggerId: id,
+      });
+      throw new Error("Registry has no store attached");
+    }
+
+    this._configCache.delete(id);
+
+    const logger = this._loggers.get(id);
+    if (logger) {
+      logger.clearLevel();
+    }
+
+    const store = this._store;
+    void (async () => {
+      if (typeof store.delete === "function") {
+        await store.delete(id);
+        return;
+      }
+      const remaining = (await store.list()).filter((c) => c.id !== id);
+      await store.setAll(remaining);
+    })();
+  }
+
+  /**
+   * Union of registered loggers and store/cache ids with configured + effective.
+   */
+  listLevels(): LoggerLevelInfo[] {
+    const ids = new Set<string>([
+      ...this._loggers.keys(),
+      ...this._configCache.keys(),
+    ]);
+    return Array.from(ids)
+      .sort()
+      .map((id) => ({
+        id,
+        configured: this.lookupConfigured(id),
+        effective: this.getEffectiveLevel(id),
+      }));
+  }
+
+  /**
+   * Unregister a logger from the registry (instance map only — does not unset store).
    */
   unregister(id: string): void {
     const existed = this._loggers.has(id);
@@ -220,8 +272,6 @@ export class Registry {
 
   /**
    * Check if a logger with the given ID is registered
-   * @param id - The logger ID to check
-   * @returns true if logger exists, false otherwise
    */
   has(id: string): boolean {
     return this._loggers.has(id);
@@ -238,7 +288,8 @@ export class Registry {
     }
     this._log.debug("Logger retrieved successfully", {
       loggerId: id,
-      level: logger.level,
+      configured: logger.configuredLevel,
+      effective: logger.level,
     });
     return logger;
   }

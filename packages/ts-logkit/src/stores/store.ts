@@ -29,6 +29,12 @@ export interface Store {
   set(config: LoggerStoreConfig): Promise<void>;
 
   /**
+   * Remove a logger config row (NOTSET / inherit).
+   * If omitted, Registry.unset falls back to list + setAll without that id.
+   */
+  delete?(id: string): Promise<void>;
+
+  /**
    * Subscribe to changes for a specific logger's config
    * @param name - The logger name/id to subscribe to
    * @param callback - Function called when the config changes

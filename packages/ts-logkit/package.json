@@ -1,6 +1,6 @@
 {
   "name": "@buchanan-solutions/ts-logkit",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "private": false,
   "description": "Composable TypeScript logging toolkit with hooks and transports",
   "repository": {
@@ -55,7 +55,7 @@
   "devDependencies": {
     "@types/node": "^25.0.3",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   },
   "peerDependencies": {
     "vitest": "^1 || ^2 || ^3"

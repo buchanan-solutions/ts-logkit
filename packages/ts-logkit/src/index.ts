@@ -2,7 +2,7 @@
 export * from "./core";
 
 // Registry exports
-export { Registry } from "./registry/registry";
+export { Registry, type LoggerLevelInfo } from "./registry/registry";
 
 // Storage exports
 export { InMemoryStore } from "./stores";

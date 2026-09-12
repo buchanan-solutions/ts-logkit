@@ -1,23 +1,24 @@
-import { LoggerStoreConfig, Store, SystemConfig } from "./store";
+import { type LoggerStoreConfig, type Store, type SystemConfig } from "./store";
+
 /**
- * In-memory logging storage implementation
+ * In-memory logging storage implementation.
+ * Rows are explicit severities only — absence means NOTSET / inherit.
  */
 export class InMemoryStore implements Store {
   private _config: Map<string, LoggerStoreConfig> = new Map();
 
   /**
    * Get the current logging configuration
-   * @returns The current logging configuration
    */
   async list(): Promise<SystemConfig> {
     return Array.from(this._config.values());
   }
 
   /**
-   * Set the current logging configuration
-   * @param config The new logging configuration
+   * Replace the full system logging configuration (clear + write).
    */
   async setAll(config: SystemConfig): Promise<void> {
+    this._config.clear();
     for (const c of config) {
       this._config.set(c.id, c);
     }
@@ -25,16 +26,20 @@ export class InMemoryStore implements Store {
 
   /**
    * Set a new logger configuration
-   * @param config The new logger configuration (only serializable data)
    */
   async set(config: LoggerStoreConfig): Promise<void> {
     this._config.set(config.id, config);
   }
 
   /**
+   * Remove a logger configuration row (inherit again).
+   */
+  async delete(id: string): Promise<void> {
+    this._config.delete(id);
+  }
+
+  /**
    * Get a logger configuration
-   * @param id The id of the logger to get
-   * @returns The logger configuration (only serializable data)
    */
   async get(id: string): Promise<LoggerStoreConfig> {
     const config = this._config.get(id);

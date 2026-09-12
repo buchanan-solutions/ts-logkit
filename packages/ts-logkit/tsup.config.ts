@@ -8,10 +8,15 @@ export default defineConfig({
     "src/stores/index.ts",
     "src/stores/server.ts",
     "src/testing/index.ts",
-    "src/testing/vitest/index.ts"
+    "src/testing/vitest/index.ts",
   ],
   format: ["cjs", "esm"],
-  dts: true,
+  dts: {
+    compilerOptions: {
+      ignoreDeprecations: "6.0",
+      types: ["node"],
+    },
+  },
   clean: true,
-  external: ["vitest"]
+  external: ["vitest"],
 });

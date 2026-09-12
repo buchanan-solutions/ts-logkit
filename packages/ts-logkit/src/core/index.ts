@@ -5,6 +5,11 @@ export {
   type FactoryConfig,
   NoopLoggerFactory,
 } from "./factory";
+export {
+  setDefaultFactory,
+  getDefaultFactory,
+  getLogger,
+} from "./defaultFactory";
 export { Global, setInternalLogLevel } from "./global";
 export { NoopLogger } from "./noop";
 export * from "./formatters";

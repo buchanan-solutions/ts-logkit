@@ -1,5 +1,30 @@
 # ts-logkit
 
+## 0.4.0
+
+### Breaking
+
+- **`child()` inherits (NOTSET)** — no longer copies the parent’s concrete min-level. Descendants that stay NOTSET pick up ancestor `setLevel` / `registry.update` on the next emit.
+- **`.level` is effective severity** — use new `configuredLevel` (`Level | 'notset'`) for the pin/inherit state.
+- **Register does not persist** — creating a logger no longer `store.set`s a row. Only `registry.update` / `unset` write the store. Store rows are explicit severities only.
+
+### Added
+
+- `configuredLevel`, `getEffectiveLevel()`, `clearLevel()`
+- `Registry.unset(id)`, `Registry.listLevels()`, dotted ancestor walk via cache/live only (never Store on `shouldLog`)
+- `LoggerFactory.getLogger` alias; `setDefaultFactory` + top-level `getLogger`
+- `ConfiguredLevel` / `NOTSET` types; optional `Store.delete`
+
+### Migration
+
+Prefer pinning a service/feature ancestor (`ops-api`, `ops-api.runout`) over `{ level: 'debug' }` at every `child()` call site. See README.
+
+## 0.3.4
+
+### Patch Changes
+
+- Dev toolchain: TypeScript 6. tsup `dts` sets `ignoreDeprecations: "6.0"` (tsup still injects deprecated `baseUrl`) and `types: ["node"]` so FileSystemStore declarations emit.
+
 ## 0.3.3
 
 ### Patch Changes

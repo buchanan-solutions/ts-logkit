@@ -114,4 +114,13 @@ export class FileSystemStore implements Store {
     this.cache.set(config.id, config);
     await this.saveCache();
   }
+
+  /**
+   * Remove a logger config row so the id inherits again.
+   */
+  async delete(id: string): Promise<void> {
+    await this.loadCache();
+    this.cache.delete(id);
+    await this.saveCache();
+  }
 }
