@@ -1,4 +1,4 @@
-// ./packages/ts-logkit/tsup.config.ts
+// ./tsup.config.ts
 import { defineConfig } from "tsup";
 
 export default defineConfig({

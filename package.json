@@ -1,23 +1,71 @@
 {
-  "name": "ts-logkit",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "pnpm --filter @buchanan-solutions/ts-logkit test",
-    "test:verbose": "pnpm --filter @buchanan-solutions/ts-logkit test:verbose",
-    "build": "pnpm --filter @buchanan-solutions/ts-logkit build",
-    "watch": "pnpm chokidar \"packages/ts-logkit/**/*\" -i \"packages/ts-logkit/dist/**\" -c \"pnpm build\""
+  "name": "@buchanan-solutions/ts-logkit",
+  "version": "0.4.1",
+  "private": false,
+  "description": "Composable TypeScript logging toolkit with hooks and transports",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/buchanan-solutions/ts-logkit"
   },
-  "keywords": [],
-  "author": "",
+  "type": "module",
   "license": "MIT",
-  "description": "",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "echo \"todo\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:verbose": "vitest run --reporter verbose --globals",
+    "changeset": "changeset",
+    "version": "changeset version"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./registry": {
+      "types": "./dist/registry/index.d.ts",
+      "import": "./dist/registry/index.js",
+      "require": "./dist/registry/index.cjs"
+    },
+    "./stores": {
+      "types": "./dist/stores/index.d.ts",
+      "import": "./dist/stores/index.js",
+      "require": "./dist/stores/index.cjs"
+    },
+    "./stores/server": {
+      "types": "./dist/stores/server.d.ts",
+      "import": "./dist/stores/server.js",
+      "require": "./dist/stores/server.cjs"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "import": "./dist/testing/index.js",
+      "require": "./dist/testing/index.cjs"
+    }
+  },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.9.6",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.2",
     "vite-tsconfig-paths": "^6.0.3",
-    "vitest": "^1.2.0"
+    "vitest": "^1 || ^2 || ^3"
   },
   "packageManager": "pnpm@10.6.3"
 }

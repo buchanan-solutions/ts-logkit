@@ -1,4 +1,4 @@
-// ./packages/ts-logkit/src/testing/vitest/mockLogger.ts
+// ./src/testing/vitest/mockLogger.ts
 import { createSpyableLogger } from "../mockLogger";
 import { vi } from "vitest";
 import type { LoggerLike } from "../../core/types/loggerLike";

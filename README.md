@@ -1,266 +1,262 @@
-# Buchanan Solutions TypeScript LogKit Monorepo
+# @buchanan-solutions/ts-logkit
 
-A **pnpm monorepo** containing the core logging SDK and future framework-specific extensions.
+Composable TypeScript logging for Node, browsers, and SSR — structured events, pluggable transports, and Python-style level inheritance.
 
----
-
-## Table of Contents
-
-- [Monorepo Overview](#-monorepo-overview)
-  - [Independent Package Philosophy](#-independent-package-philosophy)
-- [Available Packages](#-available-packages)
-- [Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Development Workflow](#development-workflow)
-- [Publishing & Distribution](#-publishing--distribution)
-- [Repository Structure](#-repository-structure)
-- [Development Guidelines](#-development-guidelines)
-- [Contributing](#-contributing)
-- [License](#-license)
+**Current version:** `0.4.1`
 
 ---
 
-## 📦 Monorepo Overview
+## Spirit
 
-This repository uses [pnpm workspaces](https://pnpm.io/workspaces) to manage multiple packages efficiently:
+If you've ever typed `logging.getLogger("a.b.c")` in Python and felt a quiet little *yes* — this kit is for that feeling.
+
+Same muscle memory: dotted names, children that inherit until you pin them, flip one ancestor and a whole subtree wakes up (or shuts up) without hunting the repo for leftover `{ level: "debug" }`. No ceremony, no framework religion — just loggers you can reason about at 2am.
+
+We didn't invent logging. We just missed Python's and wanted it in TypeScript.
+
+## Install
+
+GitHub Packages (add an `.npmrc` in the consuming repo):
 
 ```
-ts-logkit/
-├── packages/
-│   └── ts-logkit/          # Core, framework-agnostic logging SDK
-├── package.json           # Workspace root configuration
-└── pnpm-lock.yaml         # Dependency lock file
+@buchanan-solutions:registry=https://npm.pkg.github.com
 ```
-
-### 🎯 Independent Package Philosophy
-
-Each package in this monorepo is designed to be:
-
-- **Self-contained** - No cross-dependencies between packages
-- **Independently versioned** - Each package has its own semantic versioning
-- **Separately published** - Packages are published to GitHub Package Registry independently
-- **Focused** - Each package solves a specific problem domain
-
----
-
-## 📚 Available Packages
-
-### [`@buchanan-solutions/ts-logkit`](packages/ts-logkit/)
-
-**Core, framework-agnostic logging SDK**
-
-A minimal, typed logging core built around explicit concepts: Loggers, Events, Formatters, Transports, and Hooks.
-
-**Key Features:**
-
-- 📝 Structured logger instances with explicit identity
-- 📊 Rich log levels (trace, debug, info, warn, error, fatal)
-- 🚚 Pluggable transports (console, file, network, telemetry)
-- 🎨 Formatter layer (ANSI dev formatter, browser formatter)
-- 🪝 Hook system for side effects (metrics, analytics, error reporting)
-- 🌍 Environment-safe (Node.js, Browser, SSR, Edge runtimes)
-
-See the [package README](packages/ts-logkit/README.md) for detailed documentation.
-
-### _(planned)_ `@buchanan-solutions/ts-logkit-next`
-
-Next.js adapter (App Router–aware)
-
-### _(planned)_ `@buchanan-solutions/ts-logkit-react`
-
-React helpers & context
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 20+
-- pnpm (recommended) or npm/yarn
-- Git
-
-### Installation
-
-Clone the repository:
 
 ```bash
-git clone <repository-url>
-cd ts-logkit
+pnpm add @buchanan-solutions/ts-logkit@^0.4.1
 ```
 
-Install dependencies:
+---
+
+## 60-second start
+
+```ts
+import {
+  createLoggerFactory,
+  createConsoleTransport,
+  devFormatter,
+  setDefaultFactory,
+  getLogger,
+} from "@buchanan-solutions/ts-logkit";
+
+// 1. Boot once — wire transports + process default level
+const factory = createLoggerFactory({
+  transports: [createConsoleTransport()],
+  formatter: devFormatter,
+  level: "info", // factory default when a logger inherits all the way up
+});
+
+setDefaultFactory(factory);
+
+// 2. Anywhere later — dotted ids, like Python logging
+const log = getLogger("ops-api.http");
+log.info("ready");
+
+// Or keep a parent in hand:
+const root = factory.createLogger("ops-api", { level: "info" }); // explicit pin
+const http = root.child("http"); // NOTSET → inherits ops-api → info
+http.debug("only visible after you raise ops-api (or this child) to debug");
+```
+
+`getLogger` / `createLogger` / `child()` return the **same singleton** per id when a registry is attached (and still share config via the factory when it is not).
+
+---
+
+## Configured vs effective level
+
+Every logger has two level concepts:
+
+| Concept | API | Meaning |
+|---|---|---|
+| **Configured** | `logger.configuredLevel` | `'notset'` **or** a severity you pinned |
+| **Effective** | `logger.level` / `getEffectiveLevel()` | What `debug`/`info`/… actually filter against |
+
+Rules (same idea as Python's `logging`):
+
+1. If configured is a severity → that is the effective level.
+2. If configured is `'notset'` → walk parents (`a.b.c` → `a.b` → `a`) until a pin is found.
+3. If the whole chain is NOTSET → use the **factory default** (`createLoggerFactory({ level })`).
+4. `Global.level` is still AND-ed as a process floor.
+
+```ts
+root.setLevel("warn");   // pin
+root.clearLevel();       // back to NOTSET / inherit
+```
+
+**Breaking in 0.4:** `child()` no longer copies the parent's concrete level. Children default to NOTSET and inherit live. Pass `{ level: "debug" }` only when you intentionally pin that child.
+
+---
+
+## Recommended app boot (registry + store)
+
+Use this when you want runtime flips (HTTP admin, UI, REPL) without redeploying:
+
+```ts
+import {
+  createLoggerFactory,
+  createConsoleTransport,
+  devFormatter,
+  Registry,
+  InMemoryStore,
+  setDefaultFactory,
+  getLogger,
+  type Level,
+  LEVELS,
+} from "@buchanan-solutions/ts-logkit";
+
+const registry = new Registry();
+await registry.bootstrap(new InMemoryStore());
+
+const bootLevel = (
+  LEVELS.includes((process.env.LOG_LEVEL as Level) ?? "info")
+    ? process.env.LOG_LEVEL
+    : "info"
+) as Level;
+
+const factory = createLoggerFactory({
+  transports: [createConsoleTransport()],
+  formatter: devFormatter,
+  level: bootLevel,
+  registry,
+});
+
+setDefaultFactory(factory);
+
+// Pin the service root so children have something concrete to inherit
+factory.createLogger("ops-api", { level: bootLevel });
+registry.update("ops-api", bootLevel);
+
+// Later, anywhere:
+getLogger("ops-api.runout").info("estimating");
+
+// Live flip — exact id only; NOTSET descendants pick it up on the next log line
+registry.update("ops-api.runout", "debug");
+registry.unset("ops-api.runout"); // inherit again
+
+// Inspect for UIs
+registry.listLevels();
+// → [{ id, configured: 'notset' | Level, effective: Level }, ...]
+```
+
+Important store rules:
+
+- Store rows are **explicit** severities only.
+- Creating / registering a NOTSET child does **not** write the store.
+- `shouldLog` / `getEffectiveLevel` never read the Store (cache + live instances only).
+
+---
+
+## Core pieces
+
+| Piece | Role |
+|---|---|
+| **Logger** | Filters by effective level, emits `Event`s to transports, runs hooks |
+| **Factory** | Shared transports/formatter/hooks; `createLogger` / `getLogger`; `defaultLevel` |
+| **Registry** | Singletons per id; `update` / `unset`; cache for live flips |
+| **Store** | Persist explicit `{ id, level }` (`InMemoryStore`, `FileSystemStore`, …) |
+| **Transport** | Where events go (console, file, network, …) |
+| **Formatter** | How events look (`devFormatter`, browser formatter, custom) |
+| **Hook** | Side effects after emit (metrics, Sentry, …) — never blocks logging |
+
+Levels: `trace` < `debug` < `info` < `warn` < `error` < `fatal`. There is no `OFF` — quiet a branch with an explicit high level, or don't nest under a loud parent (use a sibling id).
+
+---
+
+## API cheat sheet
+
+```ts
+// Factory
+createLoggerFactory(config) → LoggerFactory
+factory.createLogger(id, opts?)
+factory.getLogger(id, opts?)          // alias
+factory.defaultLevel
+factory.registry?
+
+// Process default (optional Python feel)
+setDefaultFactory(factory)            // or undefined to clear
+getLogger(id, opts?)                  // throws if no default factory
+
+// Logger
+logger.configuredLevel                // Level | 'notset'
+logger.level                          // effective Level
+logger.getEffectiveLevel()
+logger.setLevel(level)                // pin
+logger.clearLevel()                   // NOTSET
+logger.child(childId, opts?)          // id = parent.childId; default NOTSET
+
+// Registry
+await registry.bootstrap(store)
+registry.update(id, level)            // pin + persist
+registry.unset(id)                    // NOTSET + drop store row
+registry.listLevels()
+registry.get(id) / getAll() / has(id)
+```
+
+Env globals (optional): `TS_LOGKIT_DISABLED`, `TS_LOGKIT_LEVEL` (see package init).
+
+---
+
+## Migration from 0.3 → 0.4
+
+1. **`child()` inherit** — delete scattered `{ level: "debug" }` meant only to "see a subtree"; pin an ancestor via `setLevel` / `registry.update` instead.
+2. **`.level` is effective** — for "did I pin this?", use `configuredLevel`.
+3. **Register no longer persists** every new logger into the store — call `update` when you want a durable pin.
+4. **Additive APIs** — `getLogger`, `setDefaultFactory`, `clearLevel`, `configuredLevel`, `getEffectiveLevel`, `registry.unset`, `listLevels`.
+
+---
+
+## Testing
+
+```ts
+import { NoopLogger } from "@buchanan-solutions/ts-logkit";
+import { createMockLogger } from "@buchanan-solutions/ts-logkit/testing";
+```
+
+Vitest helpers live under `@buchanan-solutions/ts-logkit/testing` (optional peer: `vitest`).
+
+---
+
+## Development
 
 ```bash
 pnpm install
-```
-
-### Development Workflow
-
-Run tests for all packages:
-
-```bash
 pnpm test
-```
-
-Run tests for a specific package:
-
-```bash
-pnpm --filter @buchanan-solutions/ts-logkit test
-```
-
-Build all packages:
-
-```bash
 pnpm build
-```
-
-Build a specific package:
-
-```bash
-pnpm --filter @buchanan-solutions/ts-logkit build
-```
-
-Watch for changes and rebuild:
-
-```bash
-pnpm watch
-```
-
-Publish package:
-
-```bash
-# Check build is successfull locally
-pnpm -C packages/ts-logkit build
-
-# Publish to specified registry (comes from package.json, assumes valid .npmrc with auth credentials somewhere in working directory)
-pnpm publish --filter @buchanan-solutions/ts-logkit --access public
+pnpm dev          # tsup --watch
 ```
 
 ---
 
-## 📦 Publishing & Distribution
+## Publishing
 
-Packages are published to **GitHub Package Registry**:
+Published to **GitHub Package Registry** on push to `main` when the version in `package.json` is not yet on the registry.
 
-- 🌐 Fully public
-- 🔢 Semantic versioning
-- 📦 Independent package versions per workspace
-
-This repository uses [Changesets](https://github.com/changesets/changesets) to manage versioning and changelogs. Each package maintains its own `CHANGELOG.md` that is automatically updated during the release process.
-
-### Publishing Workflow
-
-1. **Create a changeset** for your changes:
+1. **Create a changeset** (optional but recommended):
 
 ```bash
 pnpm changeset
 ```
 
-Select the package(s) to update and choose a version bump (`patch`, `minor`, or `major`). Enter a description of your changes—you can use markdown formatting with sections like `### Added`, `### Changed`, `### Breaking`.
-
-2. **Update versions and changelogs**:
+2. **Bump version and changelog**:
 
 ```bash
 pnpm changeset version
-```
-
-This updates `package.json` versions and generates/updates the `CHANGELOG.md` for each affected package.
-
-3. **Commit and push**:
-
-```bash
 git add .
-git commit -m "chore: release"
-git push
+git commit -m "chore: release vX.Y.Z"
+git push origin main
 ```
 
-4. **Publish**:
-
-```bash
-pnpm changeset publish
-```
-
-This publishes the updated packages to GitHub Package Registry using your `.npmrc` authentication.
+3. CI checks `npm view @buchanan-solutions/ts-logkit@X.Y.Z` — if unpublished, runs test → build → publish. If the version already exists, the workflow skips.
 
 ---
 
-## 📁 Repository Structure
+## What this is / isn't
 
-```
-ts-logkit/
-├── packages/
-│   └── ts-logkit/          # Core logging package
-│       ├── src/            # Source code
-│       ├── tests/          # Unit tests
-│       ├── dist/           # Built output (gitignored)
-│       ├── README.md       # Package documentation
-│       ├── package.json    # Package configuration
-│       └── tsconfig.json   # TypeScript configuration
-├── package.json            # Workspace root configuration
-├── pnpm-lock.yaml          # Dependency lock file
-└── README.md               # This file
-```
+**Is:** a small typed logging core for libraries and apps.  
+**Isn't:** a hosted log platform, Redis, or an HTTP admin API — those are consumers (your app wraps `Registry.update` / `listLevels`).
 
 ---
 
-## 🔧 Development Guidelines
+## License
 
-### Adding a New Package
-
-1. Create package directory: `packages/your-package-name/`
-2. Add `package.json` with proper configuration
-3. Set up TypeScript configuration
-4. Add tests with Vitest
-5. Create comprehensive README
-6. Add development documentation
-
-### Package Structure Standards
-
-Each package should follow this structure:
-
-```
-packages/your-package/
-├── src/                 # Source code
-├── tests/              # Unit tests
-├── dist/               # Built output (gitignored)
-├── README.md           # Package documentation
-├── package.json        # Package configuration
-├── tsconfig.json       # TypeScript configuration
-└── vitest.config.ts    # Test configuration
-```
-
-### Code Quality
-
-- **TypeScript**: Strict type checking enabled
-- **Testing**: Comprehensive unit test coverage
-- **Linting**: ESLint configuration
-- **Documentation**: README and API documentation
-- **CI/CD**: Automated testing and publishing
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome, especially for:
-
-- 🔌 Additional transports
-- 🔗 Framework adapters
-- 📝 Documentation improvements
-- 💡 Real-world usage examples
-
-Basic workflow:
-
-1. Fork the repository
-2. Install with `pnpm install`
-3. Make changes
-4. Ensure tests pass: `pnpm test`
-5. Update documentation if needed
-6. Open a PR with a clear description
-
----
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT

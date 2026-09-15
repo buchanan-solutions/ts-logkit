@@ -78,7 +78,7 @@
 - [x] README: NOTSET, `getLogger`, `setDefaultFactory`, configured vs effective
   - [x] This is a public repo so ensure the readme is production grade and  junior-friendly so adoption is high
 - [x] Bump `package.json` to `0.4.0`
-- [x] `pnpm --filter @buchanan-solutions/ts-logkit build` + `test` green
+- [x] `pnpm build` + `pnpm test` green
 
 ## 7. Ops-api consume (same PR stream / next; not kit HTTP)
 

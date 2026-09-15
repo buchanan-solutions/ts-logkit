@@ -1,4 +1,4 @@
-// ./packages/ts-logkit/tests/01_core/001_hello.test.ts
+// ./tests/01_core/001_hello.test.ts
 import { describe, it, expect } from "vitest";
 
 describe("hello", () => {

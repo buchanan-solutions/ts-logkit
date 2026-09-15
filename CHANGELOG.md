@@ -1,5 +1,11 @@
 # ts-logkit
 
+## 0.4.1
+
+### Patch Changes
+
+- dropped pnpm-workspace and unecessary packages dir
+
 ## 0.4.0
 
 ### Breaking

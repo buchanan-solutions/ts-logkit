@@ -1,4 +1,4 @@
-// ./packages/ts-logkit/src/testing/mockLogger.ts
+// ./src/testing/mockLogger.ts
 import type { LoggerLike } from "../core/types/loggerLike";
 
 export function createSpyableLogger(): LoggerLike {
