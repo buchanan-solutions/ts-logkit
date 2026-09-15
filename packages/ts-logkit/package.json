@@ -1,6 +1,6 @@
 {
   "name": "@buchanan-solutions/ts-logkit",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": false,
   "description": "Composable TypeScript logging toolkit with hooks and transports",
   "repository": {
@@ -12,6 +12,15 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "echo \"todo\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:verbose": "vitest run --reporter verbose --globals",
+    "combine": "bash C:/users/alexb/scripts/combine-files.sh -p src"
   },
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -43,26 +52,10 @@
       "require": "./dist/testing/index.cjs"
     }
   },
-  "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "lint": "echo \"todo\"",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:verbose": "vitest run --reporter verbose --globals",
-    "combine": "bash C:/users/alexb/scripts/combine-files.sh -p src"
-  },
   "devDependencies": {
     "@types/node": "^25.0.3",
     "tsup": "^8.5.1",
-    "typescript": "^6.0.2"
-  },
-  "peerDependencies": {
+    "typescript": "^6.0.2",
     "vitest": "^1 || ^2 || ^3"
-  },
-  "peerDependenciesMeta": {
-    "vitest": {
-      "optional": true
-    }
   }
 }
