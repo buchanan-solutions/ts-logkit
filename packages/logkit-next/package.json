@@ -1,6 +1,6 @@
 {
   "name": "@buchanan-solutions/logkit-next",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": false,
   "type": "module",
   "description": "Next.js server and client logkit wiring",
@@ -11,7 +11,7 @@
   },
   "license": "MIT",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
+    "registry": "https://registry.npmjs.org",
     "access": "public"
   },
   "files": [

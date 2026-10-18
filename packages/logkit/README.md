@@ -1,8 +1,8 @@
-# @buchanan-solutions/ts-logkit
+# @buchanan-solutions/logkit
 
 Composable TypeScript logging for Node, browsers, and SSR — structured events, pluggable transports, and Python-style level inheritance.
 
-**Current version:** `0.4.1`
+**Current version:** `0.6.0`
 
 ---
 
@@ -16,15 +16,13 @@ We didn't invent logging. We just missed Python's and wanted it in TypeScript.
 
 ## Install
 
-GitHub Packages (add an `.npmrc` in the consuming repo):
-
-```
-@buchanan-solutions:registry=https://npm.pkg.github.com
-```
+Public npm (no GitHub token required):
 
 ```bash
-pnpm add @buchanan-solutions/ts-logkit@^0.4.1
+pnpm add @buchanan-solutions/logkit@^0.6.0
 ```
+
+Remove an existing `@buchanan-solutions` registry mapping to GitHub Packages, or point it to `https://registry.npmjs.org`.
 
 ---
 
@@ -37,7 +35,7 @@ import {
   devFormatter,
   setDefaultFactory,
   getLogger,
-} from "@buchanan-solutions/ts-logkit";
+} from "@buchanan-solutions/logkit";
 
 // 1. Boot once — wire transports + process default level
 const factory = createLoggerFactory({
@@ -102,7 +100,7 @@ import {
   getLogger,
   type Level,
   LEVELS,
-} from "@buchanan-solutions/ts-logkit";
+} from "@buchanan-solutions/logkit";
 
 const registry = new Registry();
 await registry.bootstrap(new InMemoryStore());
@@ -208,11 +206,11 @@ Env globals (optional): `TS_LOGKIT_DISABLED`, `TS_LOGKIT_LEVEL` (see package ini
 ## Testing
 
 ```ts
-import { NoopLogger } from "@buchanan-solutions/ts-logkit";
-import { createMockLogger } from "@buchanan-solutions/ts-logkit/testing";
+import { NoopLogger } from "@buchanan-solutions/logkit";
+import { createMockLogger } from "@buchanan-solutions/logkit/testing";
 ```
 
-Vitest helpers live under `@buchanan-solutions/ts-logkit/testing` (optional peer: `vitest`).
+Vitest helpers live under `@buchanan-solutions/logkit/testing` (optional peer: `vitest`).
 
 ---
 
@@ -229,24 +227,9 @@ pnpm dev          # tsup --watch
 
 ## Publishing
 
-Published to **GitHub Package Registry** on push to `main` when the version in `package.json` is not yet on the registry.
+Published publicly to `https://registry.npmjs.org`. Versions and changelogs are managed with Changesets from the monorepo root. Releases are explicit: the initial upload is manual; subsequent package tags can publish through GitHub Actions with npm Trusted Publishing. Ordinary main pushes do not publish.
 
-1. **Create a changeset** (optional but recommended):
-
-```bash
-pnpm changeset
-```
-
-2. **Bump version and changelog**:
-
-```bash
-pnpm changeset version
-git add .
-git commit -m "chore: release vX.Y.Z"
-git push origin main
-```
-
-3. CI checks `npm view @buchanan-solutions/ts-logkit@X.Y.Z` — if unpublished, runs test → build → publish. If the version already exists, the workflow skips.
+See the repository's `docs/npm-publishing.md` for preparation, dry runs and publication commands.
 
 ---
 

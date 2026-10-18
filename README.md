@@ -11,35 +11,34 @@ pnpm install
 pnpm check
 ```
 
-`check` runs Biome, builds packages in dependency order, and runs the existing Vitest suites. Core tests include both `tests/` and `src/`. Fastify currently has no test suite. Python is outside this check.
+`check` runs Biome, builds packages in dependency order, and runs the existing Vitest suites. Core tests include both `tests/` and `src/`. Python is outside this check.
 
-The core package builds ESM, CommonJS, declarations and the `log` executable. MCP builds the `logkit-mcp` executable. Existing `/log/*` routes and environment variables are preserved.
+The core package builds ESM, CommonJS, declarations and the `log` executable. MCP builds the `logkit-mcp` executable. Debug endpoints are relative to the host mount; `/ring` is browser-safe and `/ring/node` exposes the Node listener.
 
-## Versioning and GitHub Packages
+## Versioning and public npm
+
+All six `@buchanan-solutions/logkit*` packages target `https://registry.npmjs.org` with public access. Consumers do not need a GitHub PAT. Remove any old scope mapping to GitHub Packages from consumer configuration.
 
 Changesets runs locally from the repository root:
 
 ```bash
 pnpm changeset
 pnpm run version
+pnpm install --lockfile-only
+pnpm check
 ```
 
-Review and commit the generated versions, dependency updates, changelogs and lockfile, then merge to `main`. CI checks PRs and pushes to `main`; it publishes only on package tags whose versions match the committed manifests:
+Review and commit versions, dependency updates, changelogs and the lockfile. Packages have independent versions. The prepared initial npm release is core `0.6.0` and the five adapters/MCP packages `0.2.1`.
+
+See [the release runbook](docs/npm-publishing.md) for the first manual release and subsequent GitHub Actions Trusted Publishing setup. A safe artifact dry run after building is:
 
 ```bash
-git tag logkit@0.5.0
-git push origin logkit@0.5.0
+RELEASE_TAG=logkit@0.6.0 node scripts/release.mjs --dry-run
 ```
 
-Use the actual new package version. Adapters use tags such as `logkit-redis@0.2.0`. Each tag publishes only that package to **https://npm.pkg.github.com**, using `GITHUB_TOKEN` with `packages: write`. The tagged commit must be on `main`, and the full Node check must pass. Already-published versions are skipped; registry authentication and other lookup failures fail the release.
+CI checks pull requests and main pushes. Only matching package tags publish, after checks and verification that the commit belongs to `main`. Each tag selects one package, e.g. `logkit@0.6.0` or `logkit-mcp@0.2.1`. The release script packs with pnpm, then uploads the tarball with npm. Existing versions are skipped; other registry errors stop the release.
 
-When releasing dependent packages, publish dependencies first and wait for their workflows to finish: core → OTEL/Redis → Fastify/Next; MCP needs core. `pnpm publish` converts `workspace:*` dependencies to the committed versions. Changesets publishing automation is not required.
-
-Consumers authenticate to GitHub Packages with package read access and configure:
-
-```ini
-@buchanan-solutions:registry=https://npm.pkg.github.com
-```
+Configure an npm trusted publisher for each package before using CI. The release job uses OIDC, not `GITHUB_TOKEN` or a stored npm token. Publish core first, then OTEL/Redis, then Fastify/Next/MCP; wait for dependencies before pushing dependent tags. Do not push tags before the corresponding release is intended.
 
 ## MCP and shell CLI
 

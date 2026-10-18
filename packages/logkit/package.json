@@ -1,6 +1,6 @@
 {
   "name": "@buchanan-solutions/logkit",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": false,
   "description": "Composable logging: factory, registry, ring debug contract, and stdlib-style hierarchy",
   "repository": {
@@ -11,7 +11,7 @@
   "type": "module",
   "license": "MIT",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
+    "registry": "https://registry.npmjs.org",
     "access": "public"
   },
   "scripts": {

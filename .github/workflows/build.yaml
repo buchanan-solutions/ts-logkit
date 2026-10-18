@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          registry-url: https://npm.pkg.github.com
+          registry-url: https://registry.npmjs.org
           scope: '@buchanan-solutions'
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
@@ -34,9 +34,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      id-token: write
     concurrency:
-      group: github-packages-release
+      group: npm-release
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
@@ -45,16 +45,17 @@ jobs:
       - name: Require a commit on main
         run: git merge-base --is-ancestor HEAD origin/main
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: pnpm
-          registry-url: https://npm.pkg.github.com
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
           scope: '@buchanan-solutions'
+      - name: Use an OIDC-capable npm CLI
+        run: npm install --global npm@11.19.1
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - name: Publish tagged package
         run: node scripts/release.mjs
         env:
           RELEASE_TAG: ${{ github.ref_name }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
