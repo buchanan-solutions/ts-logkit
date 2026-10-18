@@ -1,8 +1,12 @@
-# ts-logkit
+# @buchanan-solutions/logkit
 
-## 0.6.0
+## 1.0.0
 
-### Minor Changes
+### Stable release
+
+- First stable public npm release, combining the existing logging core with the ring/debug infrastructure extracted from the original project.
+
+### API changes
 
 - 641cd43: Keep `/ring` browser-safe and expose the existing Node HTTP listener through `/ring/node`. Server consumers must import `ensureDebugHttpServer` and its options from the Node subpath. Update the Next server adapter to use that entry.
 - 8f09062: Debug HTTP routing and control clients now treat `LOG_DEBUG_URL` / `LOG_URL` as the **complete mount URL** (origin + path prefix). Endpoint suffixes are `/health`, `/tail`, `/loggers`, and `/loggers/:id` — there is no mandatory `/log` segment. Hosts may still choose mount `/log` explicitly. Update MCP and CLI configuration when upgrading from the legacy `{origin}/log/*` addressing.
@@ -189,3 +193,12 @@ This release introduces a major architectural shift in how configurations are ma
 - Error handling: `error` and `fatal` methods accept optional `Error` objects
 - Automatic timestamp generation for all log events
 - TypeScript type definitions exported (`LogLevel`, `LogEvent`, `LogTransport`, `LogHook`)
+
+## Project logging integration history
+
+These versions belong to the original project logging integration, separate from the core package history above.
+
+### 0.1.2
+
+- Debug MCP and root logging CLI. Split Next control and ingest handlers. Bootstrap the in-memory registry before Next debug HTTP.
+- Updated project OTEL and MCP utility dependencies to `0.1.1`.

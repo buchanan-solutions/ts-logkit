@@ -1,12 +1,9 @@
 # @buchanan-solutions/logkit-next
 
-## 0.2.1
+## 1.0.0
 
-### Patch Changes
+### Stable release
 
-- 641cd43: Keep `/ring` browser-safe and expose the existing Node HTTP listener through `/ring/node`. Server consumers must import `ensureDebugHttpServer` and its options from the Node subpath. Update the Next server adapter to use that entry.
-- 8f09062: Debug HTTP routing and control clients now treat `LOG_DEBUG_URL` / `LOG_URL` as the **complete mount URL** (origin + path prefix). Endpoint suffixes are `/health`, `/tail`, `/loggers`, and `/loggers/:id` — there is no mandatory `/log` segment. Hosts may still choose mount `/log` explicitly. Update MCP and CLI configuration when upgrading from the legacy `{origin}/log/*` addressing.
-- Updated dependencies [641cd43]
-- Updated dependencies [8f09062]
-  - @buchanan-solutions/logkit@0.6.0
-  - @buchanan-solutions/logkit-otel@0.2.1
+- First stable standalone release of the Next.js logging adapter, extracted from the original project logging implementation. Includes server logging, control/ingest handlers and browser transport wiring; the Node listener uses `@buchanan-solutions/logkit/ring/node`.
+- Debug HTTP clients use the complete mount URL, with `/health`, `/tail`, `/loggers` and `/loggers/:id` relative to that mount.
+- Align shared package dependencies to the `1.0.0` release: `@buchanan-solutions/logkit@1.0.0`, `@buchanan-solutions/logkit-otel@1.0.0`.

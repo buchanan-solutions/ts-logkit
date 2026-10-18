@@ -1,10 +1,9 @@
 # @buchanan-solutions/logkit-mcp
 
-## 0.2.1
+## 1.0.0
 
-### Patch Changes
+### Stable release
 
-- 8f09062: Debug HTTP routing and control clients now treat `LOG_DEBUG_URL` / `LOG_URL` as the **complete mount URL** (origin + path prefix). Endpoint suffixes are `/health`, `/tail`, `/loggers`, and `/loggers/:id` — there is no mandatory `/log` segment. Hosts may still choose mount `/log` explicitly. Update MCP and CLI configuration when upgrading from the legacy `{origin}/log/*` addressing.
-- Updated dependencies [641cd43]
-- Updated dependencies [8f09062]
-  - @buchanan-solutions/logkit@0.6.0
+- First stable standalone release of the stdio logging MCP, extracted from the original project logging implementation. Ships the `logkit-mcp` executable and the six debug tools.
+- Debug HTTP clients use the complete mount URL, with `/health`, `/tail`, `/loggers` and `/loggers/:id` relative to that mount.
+- Align shared package dependencies to the `1.0.0` release: `@buchanan-solutions/logkit@1.0.0`.

@@ -1,6 +1,6 @@
 {
   "name": "@buchanan-solutions/logkit-mcp",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "private": false,
   "type": "module",
   "description": "Stdio MCP for log debug HTTP (LOG_DEBUG_URL)",

@@ -2,7 +2,7 @@
 
 Composable TypeScript logging for Node, browsers, and SSR — structured events, pluggable transports, and Python-style level inheritance.
 
-**Current version:** `0.6.0`
+**Current version:** `1.0.0`
 
 ---
 
@@ -19,7 +19,7 @@ We didn't invent logging. We just missed Python's and wanted it in TypeScript.
 Public npm (no GitHub token required):
 
 ```bash
-pnpm add @buchanan-solutions/logkit@^0.6.0
+pnpm add @buchanan-solutions/logkit@^1.0.0
 ```
 
 Remove an existing `@buchanan-solutions` registry mapping to GitHub Packages, or point it to `https://registry.npmjs.org`.

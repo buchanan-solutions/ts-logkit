@@ -1,6 +1,6 @@
 {
   "name": "@buchanan-solutions/logkit-fastify",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "private": false,
   "type": "module",
   "description": "Fastify debug listener and createServiceLogger bundle",

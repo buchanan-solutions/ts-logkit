@@ -11,7 +11,7 @@ if (args.some((arg) => arg !== "--dry-run")) throw new Error("Only --dry-run is 
 const dryRun = args.includes("--dry-run");
 const tag = process.env.RELEASE_TAG ?? "";
 const match = /^(logkit(?:-[a-z0-9-]+)?)@(\d+\.\d+\.\d+)$/.exec(tag);
-if (!match) throw new Error(`Expected package@version tag, e.g. logkit@0.6.0; got ${tag}`);
+if (!match) throw new Error(`Expected package@version tag, e.g. logkit@1.0.0; got ${tag}`);
 const packages = readdirSync(new URL("../packages/", import.meta.url)).map((directory) => {
   const path = new URL(`../packages/${directory}/package.json`, import.meta.url);
   return { ...JSON.parse(readFileSync(path, "utf8")), directory };

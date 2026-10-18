@@ -21,7 +21,7 @@ Six scoped packages, each with its own version:
 - `@buchanan-solutions/logkit-next`
 - `@buchanan-solutions/logkit-mcp`
 
-The repository root is private and is not published. Retain the existing scope; there is no need to acquire the unscoped `logkit` name. The prepared first npm release is core `0.6.0` and each other package `0.2.1`, produced by the pending Changesets. Do not rerun versioning or invent additional bumps for this prepared release.
+The repository root is private and is not published. Retain the existing scope; there is no need to acquire the unscoped `logkit` name. The prepared first npm release is core `1.0.0` and each other package `1.0.0`, aligned for the initial stable public release. Do not rerun versioning or invent additional bumps for this prepared release.
 
 ## 1. Set up your npm account and organization
 
@@ -184,12 +184,12 @@ A successful upload alone does not establish that consumers can install and run 
 The checks and artifact dry runs have no upload side effects. After explicitly deciding to publish, from the repository root run these one at a time. Each invocation packs the built package, checks for an existing version, then performs the real upload. Keep the versioned checkout unchanged between validation and upload. Reauthenticate if the login session has expired.
 
 ```bash
-RELEASE_TAG=logkit@0.6.0 node scripts/release.mjs
-RELEASE_TAG=logkit-otel@0.2.1 node scripts/release.mjs
-RELEASE_TAG=logkit-redis@0.2.1 node scripts/release.mjs
-RELEASE_TAG=logkit-fastify@0.2.1 node scripts/release.mjs
-RELEASE_TAG=logkit-next@0.2.1 node scripts/release.mjs
-RELEASE_TAG=logkit-mcp@0.2.1 node scripts/release.mjs
+RELEASE_TAG=logkit@1.0.0 node scripts/release.mjs
+RELEASE_TAG=logkit-otel@1.0.0 node scripts/release.mjs
+RELEASE_TAG=logkit-redis@1.0.0 node scripts/release.mjs
+RELEASE_TAG=logkit-fastify@1.0.0 node scripts/release.mjs
+RELEASE_TAG=logkit-next@1.0.0 node scripts/release.mjs
+RELEASE_TAG=logkit-mcp@1.0.0 node scripts/release.mjs
 ```
 
 Stop after any failed command. Adding `--dry-run` packs and inspects without uploading or querying registry availability. The script removes its temporary archive afterward. For archival/review, use the manual packing commands above.
@@ -197,7 +197,7 @@ Stop after any failed command. Adding `--dry-run` packs and inspects without upl
 ## Local readiness recorded — 2026-10-18
 
 - `pnpm check` passed before the checkpoint and after the npm registry/version changes: builds and 87 tests passed. Biome reports existing nonblocking warnings. Python is outside this Node gate.
-- Frozen-lockfile installation passed. Changesets selected core `0.6.0` and five adapter/MCP versions `0.2.1`.
+- Frozen-lockfile installation passed. The initial stable release is aligned to `1.0.0` for all six packages.
 - All six real tarballs passed export/type/bin/license checks and `npm publish --dry-run`. Packed dependencies contain resolved versions rather than workspace/local pointers.
 - Release script guard cases passed with fake executables: invalid version tag, existing release, auth failure, packing failure, missing release and dry-run behavior. The final MCP release script also passed a real artifact dry run.
 - Read-only npm checks confirmed account `alex_buchanan` is an organization owner and all six prepared versions returned E404. This is a point-in-time check; publication still enforces registry permissions and version availability.

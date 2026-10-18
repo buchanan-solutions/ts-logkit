@@ -1,6 +1,6 @@
 {
   "name": "@buchanan-solutions/logkit",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "private": false,
   "description": "Composable logging: factory, registry, ring debug contract, and stdlib-style hierarchy",
   "repository": {
