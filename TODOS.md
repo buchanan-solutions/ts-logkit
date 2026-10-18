@@ -2,7 +2,9 @@
 
 ## Configurable debug mount path (major)
 
-**Status:** Not implemented — current code is a like-for-like port with a hardcoded `/log` segment.
+**Status:** Scheduled for the next AI Server / LogKit slice; not implemented. Current code still hardcodes `/log` in several paths.
+
+**Work package:** deploy checkout `openspec/changes/ai-server-and-logkit/overview.md` and `tasks.md` (from this checkout: `../../openspec/changes/ai-server-and-logkit/`). TypeScript routing/client/MCP changes precede the Python contract handoff.
 
 **Requirement:** Callers choose **where** debug routes are mounted (e.g. `DEBUG_PORT` root, `/api/debug`, `/private/telemetry`). Endpoints are **relative to that mount**, not nested under a mandatory `/log` prefix.
 
@@ -18,11 +20,12 @@
 
 - API: `createLogRoutes({ mount: "/api/debug" })` or equivalent → `/api/debug/tail`, `/api/debug/loggers`, …
 - `LOG_DEBUG_URL` remains the **origin + mount** (e.g. `http://127.0.0.1:6060/api/debug`), not always `…/log`.
-- MCP + CLI resolve paths from mount config or discovery, not baked-in `/log`.
+- MCP + CLI treat the supplied base URL as the complete mount and append only endpoint suffixes; no discovery or implicit `/log`.
+- Health shares that mount: `{base}/health`; controls are `{base}/tail`, `{base}/loggers`, and `{base}/loggers/:id` (GET/PUT/DELETE for an id; no POST level update).
 - Python `logkit.debug` / FastAPI helper mirrors the same contract.
 - Update `docs/debug-http-contract.md` and golden fixtures when implemented.
 
-**Implement after:** packages compile, tests run, and ts-mono / ai-server consumers have a migration note.
+**Implement in:** phase 0 of the linked work package, now that Node builds/tests are green. Update the contract, fixtures, adapters and migration notes together, then implement Python against that mount-relative contract. Do not mark this complete until the code and checks pass.
 
 ---
 
