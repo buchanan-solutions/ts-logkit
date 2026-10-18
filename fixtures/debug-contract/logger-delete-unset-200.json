@@ -1,0 +1,8 @@
+{
+  "mount": "/api/logging",
+  "request": { "method": "DELETE", "path": "/api/logging/loggers/server" },
+  "response": {
+    "status": 200,
+    "body": { "id": "server", "configured": "notset", "effective": "info" }
+  }
+}

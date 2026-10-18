@@ -1,6 +1,8 @@
 import { Command, Option } from "commander";
 import packageJson from "../../package.json";
 
+import { createLogControlClient } from "../ring/client/control-client.ts";
+
 import { filterLogLines } from "./filter-lines.ts";
 import { asLoggerRows, formatLoggerTable, sortLoggerRows } from "./format-loggers.ts";
 import { resolveBaseUrl } from "./resolve-base-url.ts";
@@ -16,36 +18,6 @@ type TailBody = {
 };
 
 /**
- * Calls the private debug listener and returns parsed JSON.
- */
-async function requestJson(url: string, init?: RequestInit): Promise<unknown> {
-  let res: Response;
-  try {
-    res = await fetch(url, init);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    throw new Error(`log request failed (${url}): ${message}`);
-  }
-  const text = await res.text();
-  let body: unknown = text;
-  if (text) {
-    try {
-      body = JSON.parse(text) as unknown;
-    } catch {
-      body = text;
-    }
-  }
-  if (!res.ok) {
-    const error =
-      body && typeof body === "object" && "error" in body
-        ? String((body as { error: unknown }).error)
-        : text || res.statusText;
-    throw new Error(`${res.status} ${error} (${url})`);
-  }
-  return body;
-}
-
-/**
  * Prints a JSON value for humans reading a terminal.
  */
 function printJson(value: unknown): void {
@@ -53,7 +25,7 @@ function printJson(value: unknown): void {
 }
 
 /**
- * Commander program: `log` against the private `/log` listener.
+ * Commander program: `log` against the private debug mount (`LOG_URL` / default root).
  */
 function buildProgram(): Command {
   const program = new Command();
@@ -85,7 +57,8 @@ function buildProgram(): Command {
     )
     .action(async (opts: { table?: boolean; sort?: "asc" | "desc" }) => {
       const baseUrl = program.opts<{ baseUrl: string }>().baseUrl;
-      let rows = asLoggerRows(await requestJson(`${baseUrl}/log/loggers`));
+      const client = createLogControlClient({ base: baseUrl });
+      let rows = asLoggerRows(await client.log.listLoggers());
       if (opts.sort) rows = sortLoggerRows(rows, opts.sort);
       if (opts.table) {
         process.stdout.write(formatLoggerTable(rows));
@@ -100,7 +73,8 @@ function buildProgram(): Command {
     .argument("<id>", "logger id")
     .action(async (id: string) => {
       const baseUrl = program.opts<{ baseUrl: string }>().baseUrl;
-      printJson(await requestJson(`${baseUrl}/log/loggers/${encodeURIComponent(id)}`));
+      const client = createLogControlClient({ base: baseUrl });
+      printJson(await client.log.getLogger(id));
     });
 
   loggers
@@ -110,13 +84,8 @@ function buildProgram(): Command {
     .argument("<level>", "kit level name (debug, info, warn, error, …)")
     .action(async (id: string, level: string) => {
       const baseUrl = program.opts<{ baseUrl: string }>().baseUrl;
-      printJson(
-        await requestJson(`${baseUrl}/log/loggers/${encodeURIComponent(id)}`, {
-          method: "PUT",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ level }),
-        }),
-      );
+      const client = createLogControlClient({ base: baseUrl });
+      printJson(await client.log.setLoggerLevel(id, level));
     });
 
   loggers
@@ -125,11 +94,8 @@ function buildProgram(): Command {
     .argument("<id>", "logger id")
     .action(async (id: string) => {
       const baseUrl = program.opts<{ baseUrl: string }>().baseUrl;
-      printJson(
-        await requestJson(`${baseUrl}/log/loggers/${encodeURIComponent(id)}`, {
-          method: "DELETE",
-        }),
-      );
+      const client = createLogControlClient({ base: baseUrl });
+      printJson(await client.log.unsetLoggerLevel(id));
     });
 
   program
@@ -139,9 +105,12 @@ function buildProgram(): Command {
     .option("-q, --query <text>", "case-insensitive substring over each line JSON")
     .action(async (opts: { lines: string; query?: string }) => {
       const baseUrl = program.opts<{ baseUrl: string }>().baseUrl;
-      const params = new URLSearchParams({ n: opts.lines });
-      if (opts.query) params.set("q", opts.query);
-      const body = (await requestJson(`${baseUrl}/log/tail?${params}`)) as TailBody;
+      const client = createLogControlClient({ base: baseUrl });
+      const n = Number(opts.lines);
+      const body = (await client.log.tail(
+        Number.isFinite(n) ? n : undefined,
+        opts.query,
+      )) as TailBody;
       if (opts.query && (body == null || typeof body !== "object" || !("q" in body))) {
         const lines = Array.isArray(body?.lines) ? body.lines : [];
         printJson({ ...body, q: opts.query, lines: filterLogLines(lines, opts.query) });

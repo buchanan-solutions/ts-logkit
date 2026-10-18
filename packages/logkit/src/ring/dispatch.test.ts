@@ -13,11 +13,11 @@ describe("handleNextLogControlSlug", () => {
     isAllowed: () => true,
   };
 
-  it("returns 404 when slug does not start with log", async () => {
+  it("returns 404 for unknown slug", async () => {
     const result = await handleNextLogControlSlug(
       {
         method: "GET",
-        slug: ["tail"],
+        slug: ["unknown"],
         searchParams: new URLSearchParams(),
         jsonBody: async () => ({}),
       },
@@ -30,7 +30,7 @@ describe("handleNextLogControlSlug", () => {
     const result = await handleNextLogControlSlug(
       {
         method: "POST",
-        slug: ["log"],
+        slug: ["tail"],
         searchParams: new URLSearchParams(),
         jsonBody: async () => ({}),
       },
@@ -39,17 +39,30 @@ describe("handleNextLogControlSlug", () => {
     expect(result.status).toBe(404);
   });
 
-  it("tails when slug is log/tail", async () => {
+  it("tails when slug is tail", async () => {
     const result = await handleNextLogControlSlug(
       {
         method: "GET",
-        slug: ["log", "tail"],
+        slug: ["tail"],
         searchParams: new URLSearchParams(),
         jsonBody: async () => ({}),
       },
       deps,
     );
     expect(result.status).toBe(200);
+  });
+
+  it("returns health when slug is health", async () => {
+    const result = await handleNextLogControlSlug(
+      {
+        method: "GET",
+        slug: ["health"],
+        searchParams: new URLSearchParams(),
+        jsonBody: async () => ({}),
+      },
+      deps,
+    );
+    expect(result).toEqual({ status: 200, body: { status: "ok" } });
   });
 });
 

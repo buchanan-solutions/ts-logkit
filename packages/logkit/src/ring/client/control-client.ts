@@ -1,5 +1,7 @@
+import { joinDebugSuffix, normalizeDebugBase } from "../mount.ts";
+
 export type CreateLogControlClientOptions = {
-  /** Origin or path prefix before `/log/...` (e.g. `http://127.0.0.1:6060`, `/api/debug`). */
+  /** Complete mount URL: origin plus mount path (e.g. `http://127.0.0.1:6060/api/logging`). */
   base: string;
 };
 
@@ -14,15 +16,11 @@ export type LogControlClient = {
   };
 };
 
-function normalizeBase(base: string): string {
-  return base.trim().replace(/\/+$/, "");
-}
-
 /**
- * Fetch client for `{base}/log/tail`, `{base}/log/loggers`, etc.
+ * Fetch client for `{base}/tail`, `{base}/loggers`, etc. (`base` is the full mount URL).
  */
 export function createLogControlClient(options: CreateLogControlClientOptions): LogControlClient {
-  const base = normalizeBase(options.base);
+  const base = normalizeDebugBase(options.base);
 
   async function parseResponse(path: string, res: Response): Promise<unknown> {
     const text = await res.text();
@@ -40,15 +38,17 @@ export function createLogControlClient(options: CreateLogControlClientOptions): 
     return body;
   }
 
-  async function get(path: string): Promise<unknown> {
-    const res = await fetch(`${base}${path}`, {
+  async function get(suffix: string): Promise<unknown> {
+    const url = joinDebugSuffix(base, suffix);
+    const res = await fetch(url, {
       headers: { Accept: "application/json" },
     });
-    return parseResponse(path, res);
+    return parseResponse(url, res);
   }
 
-  async function put(path: string, body: unknown): Promise<unknown> {
-    const res = await fetch(`${base}${path}`, {
+  async function put(suffix: string, body: unknown): Promise<unknown> {
+    const url = joinDebugSuffix(base, suffix);
+    const res = await fetch(url, {
       method: "PUT",
       headers: {
         Accept: "application/json",
@@ -56,24 +56,25 @@ export function createLogControlClient(options: CreateLogControlClientOptions): 
       },
       body: JSON.stringify(body),
     });
-    return parseResponse(path, res);
+    return parseResponse(url, res);
   }
 
-  async function del(path: string): Promise<unknown> {
-    const res = await fetch(`${base}${path}`, {
+  async function del(suffix: string): Promise<unknown> {
+    const url = joinDebugSuffix(base, suffix);
+    const res = await fetch(url, {
       method: "DELETE",
       headers: { Accept: "application/json" },
     });
-    return parseResponse(path, res);
+    return parseResponse(url, res);
   }
 
   return {
     health: () => get("/health"),
     log: {
-      listLoggers: () => get("/log/loggers"),
-      getLogger: (id) => get(`/log/loggers/${encodeURIComponent(id)}`),
-      setLoggerLevel: (id, level) => put(`/log/loggers/${encodeURIComponent(id)}`, { level }),
-      unsetLoggerLevel: (id) => del(`/log/loggers/${encodeURIComponent(id)}`),
+      listLoggers: () => get("/loggers"),
+      getLogger: (id) => get(`/loggers/${encodeURIComponent(id)}`),
+      setLoggerLevel: (id, level) => put(`/loggers/${encodeURIComponent(id)}`, { level }),
+      unsetLoggerLevel: (id) => del(`/loggers/${encodeURIComponent(id)}`),
       tail: (n, q) => {
         const params = new URLSearchParams();
         if (n != null && Number.isFinite(n)) {
@@ -82,7 +83,7 @@ export function createLogControlClient(options: CreateLogControlClientOptions): 
         const needle = q?.trim();
         if (needle) params.set("q", needle);
         const qs = params.toString() ? `?${params.toString()}` : "";
-        return get(`/log/tail${qs}`);
+        return get(`/tail${qs}`);
       },
     },
   };

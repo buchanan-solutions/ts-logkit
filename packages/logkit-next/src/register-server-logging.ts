@@ -27,6 +27,8 @@ export type RegisterNextServerLoggingOptions = {
   defaultLogCapacity?: number;
   /** The private debug listener's port; `DEBUG_PORT`, else 6060, when not said. */
   debugPort?: number;
+  /** Contract mount on the private listener (default `/`). */
+  debugMount?: string;
 };
 
 export type RegisterNextServerLoggingResult = {
@@ -140,6 +142,7 @@ export function registerNextServerLogging(
 
   ensureDebugHttpServer({
     ...(options.debugPort == null ? {} : { debugPort: options.debugPort }),
+    ...(options.debugMount == null ? {} : { mount: options.debugMount }),
     loggerRegistry,
     logRing,
     rootLog,

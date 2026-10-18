@@ -1,6 +1,6 @@
 # Node migration
 
-Existing logging behavior, `/log/*` routes and environment variable names are retained. Package names and entry points change; no legacy package shim is provided.
+Package names and entry points changed from legacy `@core-mfg/log*`; no legacy package shim is provided.
 
 - Legacy standalone logging core → `@buchanan-solutions/logkit`.
 - Ring buffer, dispatch, tail and Node debug listener → `@buchanan-solutions/logkit/ring`.
@@ -14,4 +14,21 @@ Existing logging behavior, `/log/*` routes and environment variable names are re
 
 Registry, stores, server stores, and testing helpers remain available through core's `/registry`, `/stores`, `/stores/server`, `/testing`, and `/testing/vitest` entry points.
 
-Application-specific sessions, environment setup and MCP host installation remain in the consumer. Python and configurable debug mounts are deferred.
+## Debug base URL change (mount-relative)
+
+**Before (legacy):** `LOG_DEBUG_URL=http://127.0.0.1:6060` implied control routes under **`/log/*`** (`/log/tail`, `/log/loggers`, …). Health was often at **`/health`** on the listener root.
+
+**After:** `LOG_DEBUG_URL` is the **complete mount URL**. Examples:
+
+| Mount intent | `LOG_DEBUG_URL` | List loggers |
+|--------------|-----------------|--------------|
+| Listener root | `http://127.0.0.1:6060` | `GET /loggers` |
+| AI Server (planned) | `http://127.0.0.1:6060/api/logging` | `GET /api/logging/loggers` |
+| Alternate | `http://127.0.0.1:6060/api/t-log` | `GET /api/t-log/tail` |
+| Legacy grouping | `http://127.0.0.1:6060/log` | `GET /log/tail` |
+
+Health for MCP tools is **`{LOG_DEBUG_URL}/health`** (same mount as tail/loggers). There is no automatic alias from the old origin-only URL to `/log/*`.
+
+Fastify `startDebugHttpServer({ debugMount })` and Node `ensureDebugHttpServer({ mount })` default to `/`. Service-level `/health` on Fastify (name/status) is unchanged and separate from contract health under the debug mount.
+
+Application-specific sessions, environment setup and MCP host installation remain in the consumer. Python parity is documented in [`python-integration-api.md`](python-integration-api.md).

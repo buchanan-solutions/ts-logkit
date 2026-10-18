@@ -8,4 +8,10 @@ description = "UV workspace root for buchanan-solutions-logkit (not published)"
 members = ["python/logkit", "python/logkit-mcp"]
 
 [dependency-groups]
-dev = ["pytest", "pytest-asyncio", "ruff", "pyright"]
+dev = [
+    "pytest>=9",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.15",
+    "pyright>=1.1",
+    "hatch>=1.16.5",
+]

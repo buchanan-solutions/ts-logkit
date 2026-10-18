@@ -23,6 +23,12 @@ export {
   unsetLoggerLevel,
   updateLoggerLevel,
 } from "./loggers.ts";
+export {
+  joinDebugSuffix,
+  normalizeDebugBase,
+  normalizeMount,
+  pathnameUnderMount,
+} from "./mount.ts";
 export { type EnsureDebugHttpServerOptions, ensureDebugHttpServer } from "./node/debug-http.ts";
 export { resolveDebugPort } from "./ports.ts";
 export {

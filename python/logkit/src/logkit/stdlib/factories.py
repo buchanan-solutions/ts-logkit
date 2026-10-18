@@ -6,10 +6,6 @@ from __future__ import annotations
 import logging
 import sys
 
-from rich.console import Console
-from rich.logging import RichHandler
-from rich.theme import Theme
-
 from logkit.stdlib.formatters.level_color_formatter import LevelColorFormatter
 from logkit.stdlib.formatters.styles import (
     _LOGGER_RICH_CLOSE,
@@ -18,15 +14,9 @@ from logkit.stdlib.formatters.styles import (
     _RESET,
 )
 
-_LOG_THEME = Theme(
-    {
-        "log.path": "dim italic bright_black",
-    }
-)
-
 
 def create_colored_level_handler() -> logging.Handler:
-    """Rich console handler used as the default sink (import path stable for workers)."""
+    """ANSI console handler (no Rich dependency)."""
     formatter = LevelColorFormatter(
         fmt=f"[%(asctime)s] %(levelname)s {_LOGGER_STYLE}%(name)s{_RESET} %(message)s",
         datefmt="%y/%m/%d %H:%M:%S",
@@ -37,12 +27,21 @@ def create_colored_level_handler() -> logging.Handler:
 
 
 def create_rich_console_handler() -> logging.Handler:
-    """Rich console handler used as the default sink (import path stable for workers)."""
+    """Rich console handler; requires the ``rich`` optional extra."""
+    from rich.console import Console
+    from rich.logging import RichHandler
+    from rich.theme import Theme
+
+    log_theme = Theme(
+        {
+            "log.path": "dim italic bright_black",
+        }
+    )
 
     console = Console(
         force_terminal=True,
-        theme=_LOG_THEME,
-        width=None,  # None disables Rich's width constraint
+        theme=log_theme,
+        width=None,
     )
 
     formatter = LevelColorFormatter(

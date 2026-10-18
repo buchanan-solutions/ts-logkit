@@ -31,8 +31,8 @@ describe("createNextLogControlHandlersFromBoot", () => {
       globalKey,
       isAllowed: () => true,
     });
-    const res = await handlers.GET(new Request("http://test/log/tail"), {
-      params: Promise.resolve({ slug: ["log", "tail"] }),
+    const res = await handlers.GET(new Request("http://test/tail"), {
+      params: Promise.resolve({ slug: ["tail"] }),
     });
     expect(res.status).toBe(503);
   });
@@ -44,8 +44,8 @@ describe("createNextLogControlHandlersFromBoot", () => {
       globalKey,
       isAllowed: () => false,
     });
-    const res = await handlers.GET(new Request("http://test/log/tail"), {
-      params: Promise.resolve({ slug: ["log", "tail"] }),
+    const res = await handlers.GET(new Request("http://test/tail"), {
+      params: Promise.resolve({ slug: ["tail"] }),
     });
     expect(res.status).toBe(404);
   });

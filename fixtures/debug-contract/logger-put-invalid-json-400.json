@@ -1,0 +1,9 @@
+{
+  "mount": "/",
+  "request": {
+    "method": "PUT",
+    "path": "/loggers/app",
+    "body": "not-json"
+  },
+  "response": { "status": 400, "body": { "error": "body must be valid JSON" } }
+}

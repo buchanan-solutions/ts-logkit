@@ -26,7 +26,8 @@ export type DebugHttpPathContext = {
 };
 
 /**
- * Handles canonical DEBUG_PORT paths: /health, /log/tail, /log/loggers*.
+ * Handles mount-relative DEBUG paths: /health, /tail, /loggers*.
+ * Callers strip the configured mount prefix before invoking.
  */
 export async function handleDebugHttpPath(
   ctx: DebugHttpPathContext,
@@ -39,13 +40,13 @@ export async function handleDebugHttpPath(
     return { status: 200, body: { status: "ok" } };
   }
 
-  if (method === "GET" && pathname === "/log/tail") {
+  if (method === "GET" && pathname === "/tail") {
     const n = parseTailN(searchParams.get("n") ?? undefined);
     const q = searchParams.get("q") ?? undefined;
     return { status: 200, body: getLogTail(logRing, n, q) };
   }
 
-  if (method === "GET" && pathname === "/log/loggers") {
+  if (method === "GET" && pathname === "/loggers") {
     try {
       await beforeRegistryAccess?.();
       return { status: 200, body: listLoggerLevels(loggerRegistry) };
@@ -57,7 +58,7 @@ export async function handleDebugHttpPath(
     }
   }
 
-  const loggerMatch = /^\/log\/loggers\/(.+)$/.exec(pathname);
+  const loggerMatch = /^\/loggers\/(.+)$/.exec(pathname);
   const loggerId = loggerMatch?.[1];
   if (loggerId != null) {
     const id = decodeURIComponent(loggerId);
@@ -136,7 +137,7 @@ export async function handleNextLogIngestRequest(
 }
 
 /**
- * App Router control slugs must start with `log` (e.g. `log/tail`, `log/loggers/id`).
+ * App Router control slugs are mount-relative (e.g. `tail`, `loggers`, `loggers/id`).
  */
 export async function handleNextLogControlSlug(
   ctx: NextSlugRouteContext,
@@ -151,25 +152,29 @@ export async function handleNextLogControlSlug(
   }
 
   const slug = ctx.slug ?? [];
-  if (slug[0] !== "log") {
-    return { status: 404, body: { error: "not found" } };
-  }
-
   const { loggerRegistry, logRing, beforeRegistryAccess } = deps;
 
-  if (ctx.method === "GET" && slug.length === 2 && slug[1] === "tail") {
+  if (
+    ctx.method === "GET" &&
+    slug.length === 1 &&
+    (slug[0] === "health" || slug[0] === "healthz")
+  ) {
+    return { status: 200, body: { status: "ok" } };
+  }
+
+  if (ctx.method === "GET" && slug.length === 1 && slug[0] === "tail") {
     const n = parseTailN(ctx.searchParams.get("n") ?? undefined);
     const q = ctx.searchParams.get("q") ?? undefined;
     return { status: 200, body: getLogTail(logRing, n, q) };
   }
 
-  if (ctx.method === "GET" && slug.length === 2 && slug[1] === "loggers") {
+  if (ctx.method === "GET" && slug.length === 1 && slug[0] === "loggers") {
     await beforeRegistryAccess?.();
     return { status: 200, body: listLoggerLevels(loggerRegistry) };
   }
 
-  if (slug.length === 3 && slug[1] === "loggers" && slug[2] != null) {
-    const id = decodeURIComponent(slug[2]);
+  if (slug.length === 2 && slug[0] === "loggers" && slug[1] != null) {
+    const id = decodeURIComponent(slug[1]);
     await beforeRegistryAccess?.();
     if (ctx.method === "GET") {
       return { status: 200, body: getLoggerLevel(loggerRegistry, id) };

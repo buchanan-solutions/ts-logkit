@@ -1,7 +1,7 @@
 import type { LoggerLike, Registry } from "@buchanan-solutions/logkit";
 import type { LogLine, RingBuffer } from "@buchanan-solutions/logkit/ring";
 
-import { resolveDebugPort } from "@buchanan-solutions/logkit/ring";
+import { normalizeMount, resolveDebugPort } from "@buchanan-solutions/logkit/ring";
 import Fastify from "fastify";
 import { createLogRoutes } from "./log-routes.ts";
 
@@ -12,6 +12,8 @@ export type StartDebugHttpServerOptions = {
   logRing: RingBuffer<LogLine>;
   serviceName: string;
   debugPort?: number;
+  /** Contract mount for tail/loggers/health (default `/`). */
+  debugMount?: string;
 };
 
 /**
@@ -19,6 +21,7 @@ export type StartDebugHttpServerOptions = {
  */
 export function startDebugHttpServer(options: StartDebugHttpServerOptions): void {
   const debugPort = options.debugPort ?? resolveDebugPort();
+  const debugMount = normalizeMount(options.debugMount ?? "/");
   const { serviceName, rootLog, loggerStorage, loggerRegistry, logRing } = options;
   const log = rootLog.child("debug-http");
 
@@ -35,10 +38,13 @@ export function startDebugHttpServer(options: StartDebugHttpServerOptions): void
   void (async () => {
     try {
       await app.register(createLogRoutes({ logRing, loggerRegistry }), {
-        prefix: "/log",
+        ...(debugMount === "/" ? {} : { prefix: debugMount }),
       });
       await app.listen({ port: debugPort, host: "0.0.0.0" });
-      log.info(`debug listening at 0.0.0.0:${debugPort} (GET /health, /status, /log/*)`);
+      const mountLabel = debugMount === "/" ? "" : debugMount;
+      log.info(
+        `debug listening at 0.0.0.0:${debugPort} (GET /health, /status, ${mountLabel}/tail, ${mountLabel}/loggers)`,
+      );
     } catch (err: unknown) {
       log.error("debug listener failed", {
         error: err instanceof Error ? err.message : String(err),

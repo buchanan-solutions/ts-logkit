@@ -19,7 +19,7 @@ export type NextLogControlRouteHandlers = {
 };
 
 /**
- * Control plane for App Router `debug/[[...slug]]/route.ts` — slugs must include leading `log`.
+ * Control plane for App Router `[[...slug]]/route.ts` beneath the chosen mount.
  */
 export function createNextLogControlHandlers(
   options: CreateNextLogControlHandlersOptions,

@@ -1,0 +1,14 @@
+{
+  "mount": "/api/t-log",
+  "request": { "method": "GET", "path": "/api/t-log/tail?n=50&q=server" },
+  "response": {
+    "status": 200,
+    "body": {
+      "n": 50,
+      "q": "server",
+      "capacity": 1000,
+      "size": 0,
+      "lines": []
+    }
+  }
+}

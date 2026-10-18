@@ -4,9 +4,6 @@ import json
 import pprint
 from typing import Any
 
-from pydantic import BaseModel
-
-
 def format_for_log(message: str, data: Any) -> str:
     """
     Format a message and data object nicely for logging.
@@ -19,7 +16,8 @@ def format_for_log(message: str, data: Any) -> str:
         str: Formatted string ready for logging.
     """
     try:
-        if isinstance(data, BaseModel):
+        base_model_type = _base_model_type()
+        if base_model_type is not None and isinstance(data, base_model_type):
             data_dict = data.model_dump()
             # formatted_data = json.dumps(data_dict, indent=2, default=str)
             formatted_data = pprint.pformat(data_dict)
@@ -47,3 +45,11 @@ def format_for_log(message: str, data: Any) -> str:
         formatted_data = f"<Could not format data: {e}>"
 
     return f"{message}:\n{formatted_data}"
+
+
+def _base_model_type() -> type[Any] | None:
+    try:
+        from pydantic import BaseModel
+    except ImportError:
+        return None
+    return BaseModel

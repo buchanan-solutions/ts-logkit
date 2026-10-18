@@ -1,3 +1,3 @@
-"""Buchanan Solutions logkit — Python logging (stdlib phased config + future ring/debug)."""
+"""Buchanan Solutions logkit — Python logging (stdlib phased config + ring/debug)."""
 
-from logkit.stdlib import *  # noqa: F403
+__version__ = "0.1.0"

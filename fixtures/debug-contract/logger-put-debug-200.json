@@ -1,0 +1,12 @@
+{
+  "mount": "/api/logging",
+  "request": {
+    "method": "PUT",
+    "path": "/api/logging/loggers/server",
+    "body": { "level": "debug" }
+  },
+  "response": {
+    "status": 200,
+    "body": { "id": "server", "configured": "debug", "effective": "debug" }
+  }
+}

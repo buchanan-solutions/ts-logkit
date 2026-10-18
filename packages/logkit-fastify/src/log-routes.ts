@@ -10,11 +10,14 @@ export type LogRoutesOptions = {
 };
 
 /**
- * Debug surface: logger CRUD + ring-buffer tail under `/log`.
+ * Mount-relative debug surface: health, logger CRUD, and ring-buffer tail.
  */
 export function createLogRoutes(options: LogRoutesOptions): FastifyPluginAsync {
   const { logRing, loggerRegistry } = options;
   return async (app) => {
+    app.get("/health", async () => ({ status: "ok" }));
+    app.get("/healthz", async () => ({ status: "ok" }));
+
     await app.register(createLoggerRoutes({ loggerRegistry }), { prefix: "/loggers" });
 
     app.get<{ Querystring: { n?: string; q?: string } }>("/tail", async (request) => {

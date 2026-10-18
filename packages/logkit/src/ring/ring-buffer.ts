@@ -1,6 +1,6 @@
 import type { Event, Formatter, Level, Transport } from "../index";
 
-/** One structured line held for agent-readable `GET /log/tail`. */
+/** One structured line held for agent-readable `GET {mount}/tail`. */
 export type LogLine = {
   ts: number;
   logger_id: string;

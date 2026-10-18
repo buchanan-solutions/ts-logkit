@@ -5,7 +5,7 @@ export type LoggerRow = {
 };
 
 /**
- * Reads the `/log/loggers` payload into rows.
+ * Reads the `{mount}/loggers` payload into rows.
  * The list command sorts and prints these; a non-array body is a server bug.
  */
 export function asLoggerRows(body: unknown): LoggerRow[] {

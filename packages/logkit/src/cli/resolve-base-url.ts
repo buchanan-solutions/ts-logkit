@@ -18,10 +18,12 @@ function parsePort(raw: string): number {
   return n;
 }
 
+import { normalizeDebugBase } from "../ring/mount.ts";
+
 /**
- * Origin of the private debug listener.
- * Precedence: `--port`, then `LOG_PORT`, then `LOG_URL`, then `http://127.0.0.1:6060`.
- * A port override rewrites the port of `LOG_URL` when that is set, otherwise it uses 127.0.0.1.
+ * Complete mount URL for the private debug listener.
+ * Precedence: `--port`, then `LOG_PORT`, then `LOG_URL`, then `http://127.0.0.1:6060` (root mount).
+ * A port override rewrites the port of `LOG_URL` while preserving its mount path.
  */
 export function resolveBaseUrl(input: ResolveBaseUrlInput = {}): string {
   const env = input.env ?? process.env;
@@ -33,11 +35,11 @@ export function resolveBaseUrl(input: ResolveBaseUrlInput = {}): string {
     if (urlRaw) {
       const url = new URL(urlRaw);
       url.port = String(port);
-      return url.origin;
+      return normalizeDebugBase(url.href);
     }
     return `http://127.0.0.1:${port}`;
   }
 
-  if (urlRaw) return urlRaw.replace(/\/$/, "");
+  if (urlRaw) return normalizeDebugBase(urlRaw);
   return `http://127.0.0.1:${DEFAULT_PORT}`;
 }

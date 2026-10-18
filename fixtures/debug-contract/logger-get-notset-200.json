@@ -1,0 +1,9 @@
+{
+  "mount": "/",
+  "request": { "method": "GET", "path": "/loggers/unknown.child" },
+  "response": {
+    "status": 200,
+    "body": { "id": "unknown.child", "configured": "notset", "effective": "info" }
+  },
+  "notes": "Effective level follows inheritance when factory/root is info."
+}

@@ -1,0 +1,14 @@
+{
+  "mount": "/",
+  "request": {
+    "method": "PUT",
+    "path": "/loggers/app",
+    "body": { "level": "verbose" }
+  },
+  "response": {
+    "status": 400,
+    "body": {
+      "error": "level must be one of: trace, debug, info, warn, error, fatal"
+    }
+  }
+}

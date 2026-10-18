@@ -29,7 +29,7 @@ export function registerLogDebugTools(server: McpServer, client: LogControlClien
     {
       annotations: { ...MCP_TOOL_READ_ONLY },
       description:
-        "GET /health on the debug listener (LOG_DEBUG_URL). Confirms the log debug HTTP server is up.",
+        "GET {LOG_DEBUG_URL}/health. LOG_DEBUG_URL is the complete origin + mount. Confirms the debug HTTP server is up.",
     },
     async () => run(() => client.health()),
   );
@@ -38,7 +38,7 @@ export function registerLogDebugTools(server: McpServer, client: LogControlClien
     "debug_loggers_list",
     {
       annotations: { ...MCP_TOOL_READ_ONLY },
-      description: "List server loggers with configured and effective levels (GET /log/loggers).",
+      description: "List server loggers (GET {mount}/loggers). LOG_DEBUG_URL names the mount.",
     },
     async () => run(() => client.log.listLoggers()),
   );
@@ -47,7 +47,7 @@ export function registerLogDebugTools(server: McpServer, client: LogControlClien
     "debug_loggers_get",
     {
       annotations: { ...MCP_TOOL_READ_ONLY },
-      description: "Get one logger by id (GET /log/loggers/:id).",
+      description: "Get one logger by id (GET {mount}/loggers/:id).",
       inputSchema: { id: z.string().min(1) },
     },
     async ({ id }) => run(() => client.log.getLogger(id)),
@@ -58,7 +58,7 @@ export function registerLogDebugTools(server: McpServer, client: LogControlClien
     {
       annotations: { ...MCP_TOOL_MUTATING },
       description:
-        "Pin a logger level (PUT /log/loggers/:id). Reproduce, then debug_log_get_tail, then unset.",
+        "Pin a logger level (PUT {mount}/loggers/:id). Reproduce, then debug_log_get_tail, then unset.",
       inputSchema: {
         id: z.string().min(1),
         level: z.enum(LEVELS),
@@ -71,7 +71,7 @@ export function registerLogDebugTools(server: McpServer, client: LogControlClien
     "debug_loggers_unset_level",
     {
       annotations: { ...MCP_TOOL_MUTATING },
-      description: "Remove a logger level pin (DELETE /log/loggers/:id).",
+      description: "Remove a logger level pin (DELETE {mount}/loggers/:id).",
       inputSchema: { id: z.string().min(1) },
     },
     async ({ id }) => run(() => client.log.unsetLoggerLevel(id)),
@@ -81,7 +81,7 @@ export function registerLogDebugTools(server: McpServer, client: LogControlClien
     "debug_log_get_tail",
     {
       annotations: { ...MCP_TOOL_READ_ONLY },
-      description: "Tail the in-process log ring (GET /log/tail). Optional n and q filter.",
+      description: "Tail the in-process log ring (GET {mount}/tail). Optional n and q filter.",
       inputSchema: {
         n: z.number().int().positive().optional(),
         q: z.string().optional(),

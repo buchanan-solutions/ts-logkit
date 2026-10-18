@@ -18,4 +18,15 @@ describe("resolveLogMcpConfig", () => {
       label: "ops-api",
     });
   });
+
+  it("preserves mount path segments on LOG_DEBUG_URL", () => {
+    expect(
+      resolveLogMcpConfig({
+        LOG_DEBUG_URL: "http://127.0.0.1:6060/api/t-log/",
+      }),
+    ).toEqual({
+      debugBaseUrl: "http://127.0.0.1:6060/api/t-log",
+      label: undefined,
+    });
+  });
 });

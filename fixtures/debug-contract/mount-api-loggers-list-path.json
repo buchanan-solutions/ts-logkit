@@ -1,0 +1,6 @@
+{
+  "mount": "/api/loggers",
+  "request": { "method": "GET", "path": "/api/loggers/loggers" },
+  "response": { "status": 200, "body": [] },
+  "notes": "Intentional double segment when mount equals the loggers collection name."
+}

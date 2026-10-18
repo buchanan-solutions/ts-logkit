@@ -17,6 +17,15 @@ describe("resolveBaseUrl", () => {
     ).toBe("http://eos:6065");
   });
 
+  it("preserves LOG_URL mount path when overriding port", () => {
+    expect(
+      resolveBaseUrl({
+        portFlag: "6065",
+        env: { LOG_URL: "http://127.0.0.1:6060/api/logging" },
+      }),
+    ).toBe("http://127.0.0.1:6065/api/logging");
+  });
+
   it("uses LOG_PORT on 127.0.0.1 when LOG_URL is unset", () => {
     expect(resolveBaseUrl({ env: { LOG_PORT: "6067" } })).toBe("http://127.0.0.1:6067");
   });

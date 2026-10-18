@@ -1,0 +1,5 @@
+{
+  "mount": "/api/logging",
+  "request": { "method": "GET", "path": "/api/logging/health" },
+  "response": { "status": 200, "body": { "status": "ok" } }
+}

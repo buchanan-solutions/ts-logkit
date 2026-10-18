@@ -1,0 +1,12 @@
+{
+  "mount": "/api/logging",
+  "request": { "method": "GET", "path": "/api/logging/loggers" },
+  "response": {
+    "status": 200,
+    "body": [
+      { "id": "alpha", "configured": "notset", "effective": "info" },
+      { "id": "beta", "configured": "debug", "effective": "debug" }
+    ]
+  },
+  "notes": "Array is sorted by id; contents depend on registry state — shape is normative."
+}

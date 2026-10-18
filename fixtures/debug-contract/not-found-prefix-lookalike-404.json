@@ -1,0 +1,5 @@
+{
+  "mount": "/api/logging",
+  "request": { "method": "GET", "path": "/api/logging-other/tail" },
+  "response": { "status": 404, "body": { "error": "not found" } }
+}
