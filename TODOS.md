@@ -2,9 +2,9 @@
 
 ## Configurable debug mount path (major)
 
-**Status:** Implemented in phase 0 of deploy `openspec/changes/ai-server-and-logkit` (2026-10-18). TypeScript mount-relative routing, client/MCP/CLI updates, contract docs, and fixtures are frozen for the Python worker.
+**Status:** Implemented in phase 0 of deploy `openspec/changes/logkit-and-ai-server` (2026-10-18). TypeScript mount-relative routing, client/MCP/CLI updates, contract docs, and fixtures are frozen for the Python worker.
 
-**Work package:** `../../openspec/changes/ai-server-and-logkit/overview.md` and `tasks.md`.
+**Work package:** `../../openspec/changes/logkit-and-ai-server/overview.md` and `tasks.md`.
 
 **Behavior:**
 

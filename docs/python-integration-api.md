@@ -1,6 +1,6 @@
 # Python logkit integration API (frozen — phase 0)
 
-Do not change without updating deploy `openspec/changes/ai-server-and-logkit` and cross-language fixtures.
+Do not change without updating deploy `openspec/changes/logkit-and-ai-server` and cross-language fixtures.
 
 ## Lifecycle
 

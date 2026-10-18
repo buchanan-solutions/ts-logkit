@@ -1,6 +1,6 @@
 # DEBUG HTTP contract (mount-relative)
 
-Frozen in deploy work package `openspec/changes/ai-server-and-logkit` phase 0. TypeScript in `@buchanan-solutions/logkit/ring` is the reference implementation; Python `logkit.debug` must match these semantics.
+Frozen in deploy work package `openspec/changes/logkit-and-ai-server` phase 0. TypeScript in `@buchanan-solutions/logkit/ring` is the reference implementation; Python `logkit.debug` must match these semantics.
 
 ## Base URL semantics
 
