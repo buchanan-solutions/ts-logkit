@@ -38,6 +38,12 @@ Ring is **not** a separate npm package; use `@buchanan-solutions/logkit/ring`.
 - Core MFG host glue (session, monorepo env, route errors) stays in **ts-mono**, not here.
 - Node workspace stabilization adds builds, existing tests, CLI packaging and per-package tagged GitHub Packages releases; Python remains deferred.
 
+## Documentation
+
+- [`docs/MCP.md`](docs/MCP.md) — log debug MCP (`logkit-mcp`), env vars, host examples
+- [`docs/migration.md`](docs/migration.md) — npm/PyPI migration and mount URLs
+- [`docs/debug-http-contract.md`](docs/debug-http-contract.md) — HTTP API SSOT
+
 ## Repo layout
 
 - `packages/*` — pnpm workspace, compiled libraries.

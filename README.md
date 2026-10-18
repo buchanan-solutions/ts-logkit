@@ -41,13 +41,9 @@ Consumers authenticate to GitHub Packages with package read access and configure
 @buchanan-solutions:registry=https://npm.pkg.github.com
 ```
 
-## MCP
+## MCP and shell CLI
 
-Install `@buchanan-solutions/logkit-mcp` from GitHub Packages, then configure your MCP host to run `logkit-mcp` with `LOG_DEBUG_URL` set to the debug listener origin (for example `http://127.0.0.1:6060`). `LOG_MCP_LABEL` is optional. From a built checkout:
+- **MCP (agents):** [`docs/MCP.md`](docs/MCP.md) — stdio `logkit-mcp`, `LOG_DEBUG_URL`, host examples (Cursor / Claude / Codex). This repo does not install MCP config into your editor.
+- **Shell:** `log` from `@buchanan-solutions/logkit` — `node packages/logkit/dist/log.cjs --help` after build.
 
-```bash
-LOG_DEBUG_URL=http://127.0.0.1:6060 pnpm --filter @buchanan-solutions/logkit-mcp start:mcp
-node packages/logkit/dist/log.cjs --help
-```
-
-Host configuration stays in the consuming application. See [migration notes](docs/migration.md), [package plan](PLAN.md), [debug HTTP contract](docs/debug-http-contract.md), and [future work](TODOS.md).
+See also [migration](docs/migration.md), [debug HTTP contract](docs/debug-http-contract.md), [PLAN.md](PLAN.md), [TODOS.md](TODOS.md).

@@ -31,4 +31,4 @@ Health for MCP tools is **`{LOG_DEBUG_URL}/health`** (same mount as tail/loggers
 
 Fastify `startDebugHttpServer({ debugMount })` and Node `ensureDebugHttpServer({ mount })` default to `/`. Service-level `/health` on Fastify (name/status) is unchanged and separate from contract health under the debug mount.
 
-Application-specific sessions, environment setup and MCP host installation remain in the consumer. Python parity is documented in [`python-integration-api.md`](python-integration-api.md).
+Application-specific sessions, environment setup and MCP host installation remain in the consumer. MCP setup: [`MCP.md`](MCP.md). Python parity: [`python-integration-api.md`](python-integration-api.md).

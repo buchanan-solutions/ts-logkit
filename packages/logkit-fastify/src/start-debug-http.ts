@@ -27,7 +27,6 @@ export function startDebugHttpServer(options: StartDebugHttpServerOptions): void
 
   const app = Fastify({ logger: false });
 
-  app.get("/health", async () => ({ status: "ok", name: serviceName }));
   app.get("/healthcheck", async () => ({ status: "ok", name: serviceName }));
   app.get("/status", async () => ({
     status: "ok" as const,
@@ -43,7 +42,7 @@ export function startDebugHttpServer(options: StartDebugHttpServerOptions): void
       await app.listen({ port: debugPort, host: "0.0.0.0" });
       const mountLabel = debugMount === "/" ? "" : debugMount;
       log.info(
-        `debug listening at 0.0.0.0:${debugPort} (GET /health, /status, ${mountLabel}/tail, ${mountLabel}/loggers)`,
+        `debug listening at 0.0.0.0:${debugPort} (GET ${mountLabel}/health, /status, ${mountLabel}/tail, ${mountLabel}/loggers)`,
       );
     } catch (err: unknown) {
       log.error("debug listener failed", {
