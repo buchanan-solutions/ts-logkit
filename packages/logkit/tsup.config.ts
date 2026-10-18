@@ -4,6 +4,7 @@ export default defineConfig({
   entry: [
     "src/index.ts",
     "src/ring/index.ts",
+    "src/ring/node/index.ts",
     "src/client/index.ts",
     "src/registry/index.ts",
     "src/stores/index.ts",

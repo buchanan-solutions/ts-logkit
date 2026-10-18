@@ -111,6 +111,16 @@
         "types": "./dist/testing/vitest/index.d.cts",
         "default": "./dist/testing/vitest/index.cjs"
       }
+    },
+    "./ring/node": {
+      "import": {
+        "types": "./dist/ring/node/index.d.ts",
+        "default": "./dist/ring/node/index.js"
+      },
+      "require": {
+        "types": "./dist/ring/node/index.d.cts",
+        "default": "./dist/ring/node/index.cjs"
+      }
     }
   },
   "devDependencies": {

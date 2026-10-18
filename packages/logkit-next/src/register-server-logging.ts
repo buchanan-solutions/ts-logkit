@@ -12,10 +12,10 @@ import {
 } from "@buchanan-solutions/logkit";
 import {
   createRingBufferTransport,
-  ensureDebugHttpServer,
   type LogLine,
   type RingBuffer,
 } from "@buchanan-solutions/logkit/ring";
+import { ensureDebugHttpServer } from "@buchanan-solutions/logkit/ring/node";
 import { createOtelTransport } from "@buchanan-solutions/logkit-otel";
 
 export type RegisterNextServerLoggingOptions = {

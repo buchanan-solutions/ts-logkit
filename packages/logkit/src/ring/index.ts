@@ -29,7 +29,6 @@ export {
   normalizeMount,
   pathnameUnderMount,
 } from "./mount.ts";
-export { type EnsureDebugHttpServerOptions, ensureDebugHttpServer } from "./node/debug-http.ts";
 export { resolveDebugPort } from "./ports.ts";
 export {
   createRingBufferTransport,

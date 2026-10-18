@@ -3,7 +3,8 @@
 Package names and entry points changed from legacy `@core-mfg/log*`; no legacy package shim is provided.
 
 - Legacy standalone logging core → `@buchanan-solutions/logkit`.
-- Ring buffer, dispatch, tail and Node debug listener → `@buchanan-solutions/logkit/ring`.
+- Ring buffer, dispatch and tail → `@buchanan-solutions/logkit/ring` (browser-safe).
+- Node debug listener → `@buchanan-solutions/logkit/ring/node`.
 - Debug HTTP control client → `@buchanan-solutions/logkit/client`.
 - OTEL transport and Next tracing helpers → `@buchanan-solutions/logkit-otel` and its `/next` entry point.
 - Redis store → `@buchanan-solutions/logkit-redis`.
@@ -29,6 +30,10 @@ Registry, stores, server stores, and testing helpers remain available through co
 
 Health for MCP tools is **`{LOG_DEBUG_URL}/health`** (same mount as tail/loggers). There is no automatic alias from the old origin-only URL to `/log/*`.
 
-Fastify `startDebugHttpServer({ debugMount })` and Node `ensureDebugHttpServer({ mount })` default to `/`. Service-level `/health` on Fastify (name/status) is unchanged and separate from contract health under the debug mount.
+Fastify `startDebugHttpServer({ debugMount })` and Node `ensureDebugHttpServer({ mount })` default to `/`. Fastify contract health lives beneath that mount; listener-level `/status` and the legacy `/healthcheck` remain independent.
 
 Application-specific sessions, environment setup and MCP host installation remain in the consumer. MCP setup: [`MCP.md`](MCP.md). Python parity: [`python-integration-api.md`](python-integration-api.md).
+
+## Browser and Node entry points
+
+`@buchanan-solutions/logkit/ring` is shared browser/server code. Import `ensureDebugHttpServer` and `EnsureDebugHttpServerOptions` from `@buchanan-solutions/logkit/ring/node`; the Node HTTP listener is no longer exported through `/ring`. The listener implementation and API are unchanged.
