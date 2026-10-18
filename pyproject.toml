@@ -1,0 +1,11 @@
+[project]
+name = "logkit-workspace"
+version = "0.0.0"
+requires-python = ">=3.13"
+description = "UV workspace root for buchanan-solutions-logkit (not published)"
+
+[tool.uv.workspace]
+members = ["python/logkit", "python/logkit-mcp"]
+
+[dependency-groups]
+dev = ["pytest", "pytest-asyncio", "ruff", "pyright"]

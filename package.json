@@ -1,71 +1,23 @@
 {
-  "name": "@buchanan-solutions/ts-logkit",
-  "version": "0.4.1",
-  "private": false,
-  "description": "Composable TypeScript logging toolkit with hooks and transports",
+  "name": "logkit-monorepo",
+  "private": true,
+  "description": "Buchanan Solutions logkit — TypeScript and Python logging SSOT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/buchanan-solutions/ts-logkit"
+    "url": "https://github.com/buchanan-solutions/logkit"
   },
-  "type": "module",
   "license": "MIT",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "public"
-  },
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "lint": "echo \"todo\"",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:verbose": "vitest run --reporter verbose --globals",
+    "build": "pnpm -r run build",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test": "pnpm -r run test",
     "changeset": "changeset",
     "version": "changeset version"
   },
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE",
-    "CHANGELOG.md"
-  ],
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./registry": {
-      "types": "./dist/registry/index.d.ts",
-      "import": "./dist/registry/index.js",
-      "require": "./dist/registry/index.cjs"
-    },
-    "./stores": {
-      "types": "./dist/stores/index.d.ts",
-      "import": "./dist/stores/index.js",
-      "require": "./dist/stores/index.cjs"
-    },
-    "./stores/server": {
-      "types": "./dist/stores/server.d.ts",
-      "import": "./dist/stores/server.js",
-      "require": "./dist/stores/server.cjs"
-    },
-    "./testing": {
-      "types": "./dist/testing/index.d.ts",
-      "import": "./dist/testing/index.js",
-      "require": "./dist/testing/index.cjs"
-    }
-  },
   "devDependencies": {
-    "@changesets/cli": "^2.29.8",
-    "@types/node": "^25.9.6",
-    "tsup": "^8.5.1",
-    "typescript": "^6.0.2",
-    "vite-tsconfig-paths": "^6.0.3",
-    "vitest": "^1 || ^2 || ^3"
+    "@biomejs/biome": "^2.4.2",
+    "@changesets/cli": "^2.29.8"
   },
   "packageManager": "pnpm@10.6.3"
 }

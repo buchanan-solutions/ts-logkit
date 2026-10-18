@@ -1,0 +1,38 @@
+{
+  "name": "@buchanan-solutions/logkit-redis",
+  "version": "0.2.0",
+  "private": false,
+  "type": "module",
+  "description": "Redis-backed logkit Store with in-memory fallback",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/buchanan-solutions/logkit",
+    "directory": "packages/logkit-redis"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "biome check --write .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@buchanan-solutions/logkit": "workspace:*",
+    "redis": "^5.12.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.6",
+    "typescript": "^6.0.2",
+    "vitest": "^3.0.0"
+  }
+}

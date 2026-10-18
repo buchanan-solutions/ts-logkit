@@ -1,9 +1,10 @@
-// ./tsup.config.ts
 import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: [
     "src/index.ts",
+    "src/ring/index.ts",
+    "src/client/index.ts",
     "src/registry/index.ts",
     "src/stores/index.ts",
     "src/stores/server.ts",

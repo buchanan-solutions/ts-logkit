@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=65.5.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "buchanan-solutions-logkit"
+version = "0.1.0"
+description = "Buchanan Solutions logkit for Python — stdlib phased logging and debug parity (in progress)"
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+dependencies = []
+
+[project.optional-dependencies]
+rich = ["rich>=14"]
+fastapi = ["fastapi>=0.121", "uvicorn>=0.38"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
