@@ -11,14 +11,7 @@ export const NOTSET = "notset" as const;
 /**
  * Order of levels from least to most severe
  */
-export const LEVELS: Level[] = [
-  "trace",
-  "debug",
-  "info",
-  "warn",
-  "error",
-  "fatal",
-];
+export const LEVELS: Level[] = ["trace", "debug", "info", "warn", "error", "fatal"];
 
 /**
  * Builds ancestor id chain from most specific to root.

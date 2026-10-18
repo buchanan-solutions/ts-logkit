@@ -6,7 +6,7 @@
   "description": "Stdio MCP for log debug HTTP (LOG_DEBUG_URL)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/buchanan-solutions/logkit",
+    "url": "https://github.com/buchanan-solutions/ts-logkit",
     "directory": "packages/logkit-mcp"
   },
   "license": "MIT",
@@ -14,13 +14,16 @@
     "registry": "https://npm.pkg.github.com",
     "access": "public"
   },
-  "files": ["dist", "mcp/dist"],
+  "files": [
+    "dist",
+    "mcp/dist"
+  ],
   "bin": {
     "logkit-mcp": "./mcp/dist/stdio.mjs"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json && pnpm exec esbuild src/stdio.ts --bundle --platform=node --format=esm --outfile=mcp/dist/stdio.mjs --banner:js=\"#!/usr/bin/env node\" --external:@modelcontextprotocol/sdk",
-    "lint": "biome check --write .",
+    "lint": "biome check .",
     "test": "vitest run",
     "start:mcp": "node mcp/dist/stdio.mjs"
   },

@@ -1,15 +1,15 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  Logger,
-  createLoggerFactory,
   createConsoleTransport,
+  createLoggerFactory,
   devFormatter,
-  Global,
-  Registry,
-  InMemoryStore,
-  setDefaultFactory,
-  getLogger,
   type Event,
+  Global,
+  getLogger,
+  InMemoryStore,
+  Logger,
+  Registry,
+  setDefaultFactory,
   type Transport,
 } from "../../src/index";
 

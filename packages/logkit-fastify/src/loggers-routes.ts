@@ -1,7 +1,11 @@
 import type { Level, Registry } from "@buchanan-solutions/logkit";
+import {
+  getLoggerLevel,
+  parseLevelBody,
+  unsetLoggerLevel,
+  updateLoggerLevel,
+} from "@buchanan-solutions/logkit/ring";
 import type { FastifyPluginAsync } from "fastify";
-
-import { getLoggerLevel, parseLevelBody, unsetLoggerLevel, updateLoggerLevel } from "@buchanan-solutions/logkit/ring";
 
 export type LoggerRoutesOptions = {
   loggerRegistry: Registry;

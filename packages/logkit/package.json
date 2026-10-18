@@ -5,7 +5,7 @@
   "description": "Composable logging: factory, registry, ring debug contract, and stdlib-style hierarchy",
   "repository": {
     "type": "git",
-    "url": "https://github.com/buchanan-solutions/logkit",
+    "url": "https://github.com/buchanan-solutions/ts-logkit",
     "directory": "packages/logkit"
   },
   "type": "module",
@@ -15,63 +15,112 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && esbuild src/cli/cli.ts --bundle --platform=node --format=cjs --outfile=dist/log.cjs --banner:js=\"#!/usr/bin/env node\"",
     "dev": "tsup --watch",
-    "lint": "biome check --write .",
+    "lint": "biome check .",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "changeset": "changeset",
-    "version": "changeset version"
+    "test:watch": "vitest"
   },
-  "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "dependencies": {
     "commander": "^14.0.2",
     "zod": "^4.1.12"
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./ring": {
-      "types": "./dist/ring/index.d.ts",
-      "import": "./dist/ring/index.js",
-      "require": "./dist/ring/index.cjs"
+      "import": {
+        "types": "./dist/ring/index.d.ts",
+        "default": "./dist/ring/index.js"
+      },
+      "require": {
+        "types": "./dist/ring/index.d.cts",
+        "default": "./dist/ring/index.cjs"
+      }
     },
     "./client": {
-      "types": "./dist/client/index.d.ts",
-      "import": "./dist/client/index.js",
-      "require": "./dist/client/index.cjs"
+      "import": {
+        "types": "./dist/client/index.d.ts",
+        "default": "./dist/client/index.js"
+      },
+      "require": {
+        "types": "./dist/client/index.d.cts",
+        "default": "./dist/client/index.cjs"
+      }
     },
     "./registry": {
-      "types": "./dist/registry/index.d.ts",
-      "import": "./dist/registry/index.js",
-      "require": "./dist/registry/index.cjs"
+      "import": {
+        "types": "./dist/registry/index.d.ts",
+        "default": "./dist/registry/index.js"
+      },
+      "require": {
+        "types": "./dist/registry/index.d.cts",
+        "default": "./dist/registry/index.cjs"
+      }
     },
     "./stores": {
-      "types": "./dist/stores/index.d.ts",
-      "import": "./dist/stores/index.js",
-      "require": "./dist/stores/index.cjs"
+      "import": {
+        "types": "./dist/stores/index.d.ts",
+        "default": "./dist/stores/index.js"
+      },
+      "require": {
+        "types": "./dist/stores/index.d.cts",
+        "default": "./dist/stores/index.cjs"
+      }
     },
     "./stores/server": {
-      "types": "./dist/stores/server.d.ts",
-      "import": "./dist/stores/server.js",
-      "require": "./dist/stores/server.cjs"
+      "import": {
+        "types": "./dist/stores/server.d.ts",
+        "default": "./dist/stores/server.js"
+      },
+      "require": {
+        "types": "./dist/stores/server.d.cts",
+        "default": "./dist/stores/server.cjs"
+      }
     },
     "./testing": {
-      "types": "./dist/testing/index.d.ts",
-      "import": "./dist/testing/index.js",
-      "require": "./dist/testing/index.cjs"
+      "import": {
+        "types": "./dist/testing/index.d.ts",
+        "default": "./dist/testing/index.js"
+      },
+      "require": {
+        "types": "./dist/testing/index.d.cts",
+        "default": "./dist/testing/index.cjs"
+      }
+    },
+    "./testing/vitest": {
+      "import": {
+        "types": "./dist/testing/vitest/index.d.ts",
+        "default": "./dist/testing/vitest/index.js"
+      },
+      "require": {
+        "types": "./dist/testing/vitest/index.d.cts",
+        "default": "./dist/testing/vitest/index.cjs"
+      }
     }
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.8",
     "@types/node": "^25.9.6",
     "esbuild": "^0.25.0",
     "tsup": "^8.5.1",
     "typescript": "^6.0.2",
-    "vite-tsconfig-paths": "^6.0.3",
     "vitest": "^1 || ^2 || ^3"
+  },
+  "bin": {
+    "log": "./dist/log.cjs"
   }
 }

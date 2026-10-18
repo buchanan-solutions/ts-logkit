@@ -1,13 +1,13 @@
-import { type Event, type Level, type ConfiguredLevel, NOTSET, LEVELS } from "./types";
-import { type Transport } from "./types/transport";
-import { type Hook } from "./types/hook";
-import { type Formatter } from "./types/formatter";
-import { type Config } from "./types/config";
-import { splitError } from "./utils/splitError";
+import type { LoggerFactory } from "./factory";
 import { Global } from "./global";
-import { type LoggerFactory } from "./factory";
+import { type ConfiguredLevel, type Event, LEVELS, type Level, NOTSET } from "./types";
+import type { Config } from "./types/config";
+import type { Formatter } from "./types/formatter";
+import type { Hook } from "./types/hook";
+import type { LoggerLike } from "./types/loggerLike";
+import type { Transport } from "./types/transport";
+import { splitError } from "./utils/splitError";
 import { validateLevelAndWarn } from "./utils/validateLevel";
-import { type LoggerLike } from "./types/loggerLike";
 
 export class Logger {
   private _id: string;

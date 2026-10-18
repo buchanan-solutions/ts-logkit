@@ -1,10 +1,8 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-
 import { createLogControlClient } from "@buchanan-solutions/logkit/client";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { type LogMcpConfig, resolveLogMcpConfig } from "./config.ts";
 import { registerLogDebugTools } from "./tools.ts";
 

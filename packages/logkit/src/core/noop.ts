@@ -1,6 +1,7 @@
 // src/core/noop.ts
-import { LoggerLike } from "./types/loggerLike";
-import { Config } from "./types/config";
+
+import type { Config } from "./types/config";
+import type { LoggerLike } from "./types/loggerLike";
 
 export const NoopLogger: LoggerLike = {
   trace() {},

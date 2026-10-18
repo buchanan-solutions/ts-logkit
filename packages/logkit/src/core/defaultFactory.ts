@@ -25,13 +25,10 @@ export function getDefaultFactory(): LoggerFactory | undefined {
  * Python-shaped entry: logger by dotted id via the default factory.
  * Throws if `setDefaultFactory` was never called (or was cleared).
  */
-export function getLogger(
-  id: string,
-  opts?: ConfigOverride
-): LoggerLike {
+export function getLogger(id: string, opts?: ConfigOverride): LoggerLike {
   if (!_defaultFactory) {
     throw new Error(
-      "ts-logkit: no default factory. Call setDefaultFactory(factory) after createLoggerFactory at boot."
+      "ts-logkit: no default factory. Call setDefaultFactory(factory) after createLoggerFactory at boot.",
     );
   }
   return _defaultFactory.getLogger(id, opts);

@@ -1,16 +1,11 @@
-import { Logger } from "../core/logger";
-import { type Store } from "../stores/store";
-import {
-  type Level,
-  type ConfiguredLevel,
-  NOTSET,
-  ancestorIds,
-} from "../core/types/level";
-import { validateLevelAndWarn } from "../core/utils/validateLevel";
 import { LoggerNotFoundError } from "../core/errors/loggerNotFound";
-import type { LoggerLike } from "../core/types/loggerLike";
-import type { Config } from "../core/types/config";
+import { Logger } from "../core/logger";
 import { NoopLogger } from "../core/noop";
+import type { Config } from "../core/types/config";
+import { ancestorIds, type ConfiguredLevel, type Level, NOTSET } from "../core/types/level";
+import type { LoggerLike } from "../core/types/loggerLike";
+import { validateLevelAndWarn } from "../core/utils/validateLevel";
+import type { Store } from "../stores/store";
 
 /** Inspect row for UIs: configured pin vs resolved effective severity. */
 export interface LoggerLevelInfo {
@@ -89,9 +84,7 @@ export class Registry {
 
     const activeLoggers = Array.from(this._loggers.values());
     if (activeLoggers.length > 0) {
-      this._log.info(
-        `Applying cached levels to ${activeLoggers.length} existing loggers...`
-      );
+      this._log.info(`Applying cached levels to ${activeLoggers.length} existing loggers...`);
       activeLoggers.forEach((logger) => {
         const cachedLevel = this._configCache.get(logger.id);
         if (cachedLevel) {
@@ -242,10 +235,7 @@ export class Registry {
    * Union of registered loggers and store/cache ids with configured + effective.
    */
   listLevels(): LoggerLevelInfo[] {
-    const ids = new Set<string>([
-      ...this._loggers.keys(),
-      ...this._configCache.keys(),
-    ]);
+    const ids = new Set<string>([...this._loggers.keys(), ...this._configCache.keys()]);
     return Array.from(ids)
       .sort()
       .map((id) => ({

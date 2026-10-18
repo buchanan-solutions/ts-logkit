@@ -1,8 +1,8 @@
 import type { LoggerLike, Registry } from "@buchanan-solutions/logkit";
-import Fastify from "fastify";
+import type { LogLine, RingBuffer } from "@buchanan-solutions/logkit/ring";
 
 import { resolveDebugPort } from "@buchanan-solutions/logkit/ring";
-import type { LogLine, RingBuffer } from "@buchanan-solutions/logkit/ring";
+import Fastify from "fastify";
 import { createLogRoutes } from "./log-routes.ts";
 
 export type StartDebugHttpServerOptions = {

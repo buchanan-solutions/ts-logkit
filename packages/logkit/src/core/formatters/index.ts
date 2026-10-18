@@ -1,2 +1,2 @@
-export { formatDev, defaultFormatter, devFormatter, ANSI_COLORS } from "./default";
-export { formatBrowser, browserFormatter, BROWSER_COLORS } from "./browser";
+export { BROWSER_COLORS, browserFormatter, formatBrowser } from "./browser";
+export { ANSI_COLORS, defaultFormatter, devFormatter, formatDev } from "./default";

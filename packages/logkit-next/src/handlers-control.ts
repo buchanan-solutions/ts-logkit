@@ -47,4 +47,4 @@ export function createNextLogControlHandlers(
   };
 }
 
-export type { NextSlugRouteContext, LogDispatchDeps };
+export type { LogDispatchDeps, NextSlugRouteContext };

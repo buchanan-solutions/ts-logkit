@@ -8,7 +8,11 @@ import {
   Registry,
   setDefaultFactory,
 } from "@buchanan-solutions/logkit";
-import { createRingBufferTransport, type LogLine, type RingBuffer } from "@buchanan-solutions/logkit/ring";
+import {
+  createRingBufferTransport,
+  type LogLine,
+  type RingBuffer,
+} from "@buchanan-solutions/logkit/ring";
 import { createOtelTransport } from "@buchanan-solutions/logkit-otel";
 import { createLogkitStore } from "@buchanan-solutions/logkit-redis";
 

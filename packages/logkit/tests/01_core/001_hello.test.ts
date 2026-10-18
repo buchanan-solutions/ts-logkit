@@ -1,5 +1,5 @@
 // ./tests/01_core/001_hello.test.ts
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 describe("hello", () => {
   it("should say hello world", () => {

@@ -1,4 +1,4 @@
-import { Level, LEVELS } from "../types";
+import { LEVELS, type Level } from "../types";
 
 /**
  * Validates if a given level is a valid log level.
@@ -30,24 +30,14 @@ export interface ValidateLevelOptions {
  * @param options - Options object with warn, qualifier, onSuccess, and onFailure
  * @returns true if validation succeeded, false otherwise
  */
-export function validateLevelAndWarn(
-  level: Level,
-  options: ValidateLevelOptions = {}
-): boolean {
-  const {
-    warn = true,
-    qualifier = "validateLevelAndWarn",
-    onSuccess,
-    onFailure,
-  } = options;
+export function validateLevelAndWarn(level: Level, options: ValidateLevelOptions = {}): boolean {
+  const { warn = true, qualifier = "validateLevelAndWarn", onSuccess, onFailure } = options;
 
   const isValid = validateLevel(level);
 
   if (!isValid) {
     if (warn) {
-      console.warn(
-        `[ts-logkit] Invalid log level in ${qualifier}("${level}"), ignoring.`
-      );
+      console.warn(`[ts-logkit] Invalid log level in ${qualifier}("${level}"), ignoring.`);
     }
     if (onFailure) {
       void onFailure();

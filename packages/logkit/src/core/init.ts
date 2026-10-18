@@ -1,6 +1,6 @@
 // src/core/init.ts
 import { Global } from "./global";
-import { Level } from "./types/level";
+import type { Level } from "./types/level";
 import { validateLevelAndWarn } from "./utils/validateLevel";
 
 function readEnvFlag(): boolean | undefined {

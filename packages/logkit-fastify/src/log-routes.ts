@@ -1,8 +1,7 @@
 import type { Registry } from "@buchanan-solutions/logkit";
-import type { FastifyPluginAsync } from "fastify";
-
 import type { LogLine, RingBuffer } from "@buchanan-solutions/logkit/ring";
 import { getLogTail, parseTailN } from "@buchanan-solutions/logkit/ring";
+import type { FastifyPluginAsync } from "fastify";
 import { createLoggerRoutes } from "./loggers-routes.ts";
 
 export type LogRoutesOptions = {

@@ -1,4 +1,4 @@
-import { Level } from "../core/types/level";
+import type { Level } from "../core/types/level";
 
 /**
  * Serializable configuration stored in the store
@@ -40,10 +40,7 @@ export interface Store {
    * @param callback - Function called when the config changes
    * @returns Unsubscribe function to stop listening to changes
    */
-  subscribe?(
-    name: string,
-    callback: (config: LoggerStoreConfig) => void
-  ): () => void;
+  subscribe?(name: string, callback: (config: LoggerStoreConfig) => void): () => void;
 
   /**
    * Subscribe to changes for all loggers' configs

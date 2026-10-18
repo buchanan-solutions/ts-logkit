@@ -36,7 +36,7 @@ Ring is **not** a separate npm package; use `@buchanan-solutions/logkit/ring`.
 - Like-for-like port from Core ts-mono `@core-mfg/log*`, with **`/log`** path prefix unchanged (see `TODOS.md`).
 - No `@buchanan-solutions/ts-logkit` npm shim; consumers migrate to `@buchanan-solutions/logkit`.
 - Core MFG host glue (session, monorepo env, route errors) stays in **ts-mono**, not here.
-- **No** install/test/green CI in the initial land — structure and code copy only.
+- Node workspace stabilization adds builds, existing tests, CLI packaging and per-package tagged GitHub Packages releases; Python remains deferred.
 
 ## Repo layout
 

@@ -6,7 +6,7 @@
   "description": "Redis-backed logkit Store with in-memory fallback",
   "repository": {
     "type": "git",
-    "url": "https://github.com/buchanan-solutions/logkit",
+    "url": "https://github.com/buchanan-solutions/ts-logkit",
     "directory": "packages/logkit-redis"
   },
   "license": "MIT",
@@ -14,7 +14,9 @@
     "registry": "https://npm.pkg.github.com",
     "access": "public"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -23,7 +25,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "biome check --write .",
+    "lint": "biome check .",
     "test": "vitest run"
   },
   "dependencies": {

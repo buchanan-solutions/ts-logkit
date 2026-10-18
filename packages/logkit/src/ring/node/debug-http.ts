@@ -1,6 +1,6 @@
 import http from "node:http";
 
-import type { LoggerLike } from "@buchanan-solutions/logkit";
+import type { LoggerLike } from "../../index";
 
 import { handleDebugHttpPath, type LogDispatchDeps, readRequestBody } from "../dispatch.ts";
 import { resolveDebugPort } from "../ports.ts";

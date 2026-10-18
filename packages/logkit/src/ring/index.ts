@@ -23,6 +23,7 @@ export {
   unsetLoggerLevel,
   updateLoggerLevel,
 } from "./loggers.ts";
+export { type EnsureDebugHttpServerOptions, ensureDebugHttpServer } from "./node/debug-http.ts";
 export { resolveDebugPort } from "./ports.ts";
 export {
   createRingBufferTransport,
@@ -39,4 +40,3 @@ export {
   MAX_TAIL_N,
   parseTailN,
 } from "./tail.ts";
-export { type EnsureDebugHttpServerOptions, ensureDebugHttpServer } from "./node/debug-http.ts";

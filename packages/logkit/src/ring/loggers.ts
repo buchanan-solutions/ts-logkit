@@ -1,4 +1,4 @@
-import { LEVELS, type Level, type Registry } from "@buchanan-solutions/logkit";
+import { LEVELS, type Level, type Registry } from "../index";
 
 /**
  * Parses a JSON body `{ level }` into a kit Level, or an error message.

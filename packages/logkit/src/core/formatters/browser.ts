@@ -1,4 +1,4 @@
-import { Event, Formatter, FormattedOutput, Level } from "../types";
+import type { Event, FormattedOutput, Formatter, Level } from "../types";
 
 export const BROWSER_COLORS: Record<Level, string> = {
   trace: "color: gray",
@@ -19,7 +19,12 @@ export function formatBrowser(event: Event): FormattedOutput {
   // This check will warn if the code isn't running in a browser (i.e., window is undefined), which is generally correct for detecting a Node.js environment.
   // However, not all non-browser JS environments are Node.js, and some tools may polyfill window.
   // If you specifically want to detect Node.js, you could add an additional check:
-  if (typeof window === "undefined" && typeof process !== "undefined" && process.versions && process.versions.node) {
+  if (
+    typeof window === "undefined" &&
+    typeof process !== "undefined" &&
+    process.versions &&
+    process.versions.node
+  ) {
     console.warn("Using browser formatter in a Node.js environment; output will not be styled.");
   }
 

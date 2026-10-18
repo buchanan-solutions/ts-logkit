@@ -1,10 +1,10 @@
+import { LoggerNotFoundError } from "../registry";
+import type { Registry } from "../registry/registry";
 import { Logger } from "./logger";
 import { NoopLogger } from "./noop";
-import { Registry } from "../registry/registry";
-import { type Config, type ConfigOverride } from "./types/config";
-import { type Level } from "./types/level";
-import { LoggerNotFoundError } from "../registry";
-import { type LoggerLike } from "./types/loggerLike";
+import type { Config, ConfigOverride } from "./types/config";
+import type { Level } from "./types/level";
+import type { LoggerLike } from "./types/loggerLike";
 
 /**
  * Configuration for creating a logger factory (all Config properties except id, plus optional Registry)
@@ -40,8 +40,7 @@ export function createLoggerFactory(config: FactoryConfig): LoggerFactory {
 
   log.info("Creating logger factory");
   log.debug("Factory config", { config });
-  const { registry, level: factoryLevel = "warn", logConfig: _logConfig, ...restDefaults } =
-    config;
+  const { registry, level: factoryLevel = "warn", logConfig: _logConfig, ...restDefaults } = config;
 
   if (registry) {
     registry.defaultLevel = factoryLevel;

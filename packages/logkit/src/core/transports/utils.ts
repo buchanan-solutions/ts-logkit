@@ -1,4 +1,4 @@
-import { Transport, Event, Formatter } from "../types";
+import type { Event, Formatter, Transport } from "../types";
 
 export function combineTransports(...transports: Transport[]): Transport {
   return {

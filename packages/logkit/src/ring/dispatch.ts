@@ -1,4 +1,4 @@
-import type { Level, Registry } from "@buchanan-solutions/logkit";
+import type { Level, Registry } from "../index";
 import { ingestClientLogLines, type LogLineWithSource, parseLogIngestBody } from "./ingest.ts";
 import {
   getLoggerLevel,

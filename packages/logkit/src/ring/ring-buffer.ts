@@ -1,4 +1,4 @@
-import type { Event, Formatter, Level, Transport } from "@buchanan-solutions/logkit";
+import type { Event, Formatter, Level, Transport } from "../index";
 
 /** One structured line held for agent-readable `GET /log/tail`. */
 export type LogLine = {

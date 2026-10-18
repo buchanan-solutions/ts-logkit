@@ -1,4 +1,4 @@
-import { LEVELS, type Level } from "@buchanan-solutions/logkit";
+import { LEVELS, type Level } from "../index";
 
 import { type LogLine, type RingBuffer, serializeArgs } from "./ring-buffer.ts";
 

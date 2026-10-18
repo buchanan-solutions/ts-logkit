@@ -1,8 +1,7 @@
-import { MCP_TOOL_MUTATING, MCP_TOOL_READ_ONLY } from "./annotations.ts";
+import type { LogControlClient } from "@buchanan-solutions/logkit/client";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-
-import type { LogControlClient } from "@buchanan-solutions/logkit/client";
+import { MCP_TOOL_MUTATING, MCP_TOOL_READ_ONLY } from "./annotations.ts";
 
 const LEVELS = ["trace", "debug", "info", "warn", "error", "fatal"] as const;
 

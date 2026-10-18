@@ -1,10 +1,10 @@
 {
   "name": "logkit-monorepo",
   "private": true,
-  "description": "Buchanan Solutions logkit — TypeScript and Python logging SSOT",
+  "description": "Buchanan Solutions logkit \u2014 TypeScript and Python logging SSOT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/buchanan-solutions/logkit"
+    "url": "https://github.com/buchanan-solutions/ts-logkit"
   },
   "license": "MIT",
   "scripts": {
@@ -13,7 +13,8 @@
     "format": "biome format --write .",
     "test": "pnpm -r run test",
     "changeset": "changeset",
-    "version": "changeset version"
+    "version": "changeset version",
+    "check": "pnpm lint && pnpm build && pnpm test"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.2",

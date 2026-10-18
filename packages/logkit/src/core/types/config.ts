@@ -1,9 +1,9 @@
-import { type Level } from "./level";
-import { type Transport } from "./transport";
-import { type Hook } from "./hook";
-import { type Formatter } from "./formatter";
 import type { LoggerFactory } from "../factory";
 import type { Logger } from "../logger";
+import type { Formatter } from "./formatter";
+import type { Hook } from "./hook";
+import type { Level } from "./level";
+import type { Transport } from "./transport";
 
 /**
  * Configuration for a logger

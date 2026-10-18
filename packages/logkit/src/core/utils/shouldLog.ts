@@ -1,5 +1,4 @@
-import { Level } from "../types/level";
-import { LEVELS } from "../types/level";
+import { LEVELS, type Level } from "../types/level";
 
 /**
  * Checks if a log level should be logged based on a minimum level threshold

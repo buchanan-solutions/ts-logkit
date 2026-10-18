@@ -1,10 +1,11 @@
 import { Command, Option } from "commander";
+import packageJson from "../../package.json";
 
 import { filterLogLines } from "./filter-lines.ts";
 import { asLoggerRows, formatLoggerTable, sortLoggerRows } from "./format-loggers.ts";
 import { resolveBaseUrl } from "./resolve-base-url.ts";
 
-const CLI_VERSION = "0.1.0";
+const CLI_VERSION = packageJson.version;
 
 type TailBody = {
   n?: number;
@@ -58,7 +59,7 @@ function buildProgram(): Command {
   const program = new Command();
   program
     .name("log")
-    .description("Talk to a Core service private log listener (loggers and tail).")
+    .description("Talk to a service private log listener (loggers and tail).")
     .version(CLI_VERSION, "-v, --version", "print the log CLI version")
     .addOption(
       new Option("--port <port>", "debug listener port (default 6060, or LOG_PORT)").argParser(

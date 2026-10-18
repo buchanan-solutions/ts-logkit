@@ -28,10 +28,11 @@
 
 ## Follow-ups (smaller)
 
-- Wire `log` CLI bin build (esbuild bundle) in `@buchanan-solutions/logkit`.
+- [x] Wire `log` CLI bin build (esbuild bundle) in `@buchanan-solutions/logkit`.
 - Port ring + dispatch to Python (`logkit.ring`, `logkit.debug`).
 - Implement `buchanan-solutions-logkit-mcp` (uvx parity with `@buchanan-solutions/logkit-mcp`).
 - Contract tests: vitest + pytest against `fixtures/debug-contract/`.
-- Changesets publish workflow for all npm packages + PyPI members.
+- [x] Local Changesets versioning and per-package tagged GitHub Packages releases.
+- PyPI release workflow (deferred).
 - Migrate ts-mono from `@core-mfg/log*` workspace packages to published `@buchanan-solutions/logkit*`.
 - Rename GitHub repo to `logkit` when ready (checkout folder name can stay `ts-logkit` locally).

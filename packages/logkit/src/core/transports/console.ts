@@ -1,5 +1,5 @@
 // src/transports/console.ts
-import { Transport, Event, Formatter, FormattedOutput } from "../types";
+import type { Event, FormattedOutput, Formatter, Transport } from "../types";
 
 /**
  * Determines the appropriate console method based on the event level

@@ -1,5 +1,5 @@
-import { Registry } from "@buchanan-solutions/logkit";
 import { describe, expect, it } from "vitest";
+import { Registry } from "../index";
 
 import { handleNextLogControlSlug, handleNextLogIngestRequest } from "./dispatch.ts";
 import { createRingBufferTransport } from "./ring-buffer.ts";

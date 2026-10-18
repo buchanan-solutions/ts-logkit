@@ -1,6 +1,7 @@
-import { afterEach, describe, expect, it } from "vitest";
-
+import { once } from "node:events";
+import type http from "node:http";
 import { getLogTail } from "@buchanan-solutions/logkit/ring";
+import { afterEach, describe, expect, it } from "vitest";
 import {
   createNextLogControlHandlersFromBoot,
   createNextLogIngestHandlersFromBoot,
@@ -10,7 +11,16 @@ import { registerNextServerLogging } from "./register-server-logging.ts";
 describe("createNextLogControlHandlersFromBoot", () => {
   const globalKey = `__testBootHandlers_${crypto.randomUUID()}`;
 
-  afterEach(() => {
+  afterEach(async () => {
+    const server = (globalThis as unknown as Record<string, http.Server | undefined>)[
+      `${globalKey}_debugHttp`
+    ];
+    if (server) {
+      if (!server.listening) await once(server, "listening");
+      await new Promise<void>((resolve, reject) =>
+        server.close((error) => (error ? reject(error) : resolve())),
+      );
+    }
     delete (globalThis as Record<string, unknown>)[globalKey];
     delete (globalThis as Record<string, unknown>)[`${globalKey}_debugHttp`];
   });
@@ -28,7 +38,7 @@ describe("createNextLogControlHandlersFromBoot", () => {
   });
 
   it("returns 404 when isAllowed is false", async () => {
-    registerNextServerLogging({ app: "boot-deny", globalKey });
+    registerNextServerLogging({ app: "boot-deny", globalKey, debugPort: 0 });
     const handlers = createNextLogControlHandlersFromBoot({
       app: "boot-deny",
       globalKey,
@@ -44,13 +54,22 @@ describe("createNextLogControlHandlersFromBoot", () => {
 describe("createNextLogIngestHandlersFromBoot", () => {
   const globalKey = `__testBootIngest_${crypto.randomUUID()}`;
 
-  afterEach(() => {
+  afterEach(async () => {
+    const server = (globalThis as unknown as Record<string, http.Server | undefined>)[
+      `${globalKey}_debugHttp`
+    ];
+    if (server) {
+      if (!server.listening) await once(server, "listening");
+      await new Promise<void>((resolve, reject) =>
+        server.close((error) => (error ? reject(error) : resolve())),
+      );
+    }
     delete (globalThis as Record<string, unknown>)[globalKey];
     delete (globalThis as Record<string, unknown>)[`${globalKey}_debugHttp`];
   });
 
   it("ingests client lines into the boot ring", async () => {
-    registerNextServerLogging({ app: "boot-ingest", globalKey });
+    registerNextServerLogging({ app: "boot-ingest", globalKey, debugPort: 0 });
     const handlers = createNextLogIngestHandlersFromBoot({
       app: "boot-ingest",
       globalKey,
@@ -75,7 +94,7 @@ describe("createNextLogIngestHandlersFromBoot", () => {
     );
     expect(post.status).toBe(200);
 
-    const state = registerNextServerLogging({ app: "boot-ingest", globalKey });
+    const state = registerNextServerLogging({ app: "boot-ingest", globalKey, debugPort: 0 });
     const tail = getLogTail(state.logRing, 5);
     expect(
       tail.lines.some(

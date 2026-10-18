@@ -6,7 +6,7 @@
   "description": "Fastify debug listener and createServiceLogger bundle",
   "repository": {
     "type": "git",
-    "url": "https://github.com/buchanan-solutions/logkit",
+    "url": "https://github.com/buchanan-solutions/ts-logkit",
     "directory": "packages/logkit-fastify"
   },
   "license": "MIT",
@@ -14,7 +14,9 @@
     "registry": "https://npm.pkg.github.com",
     "access": "public"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -24,8 +26,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "biome check --write .",
-    "test": "vitest run"
+    "lint": "biome check ."
   },
   "dependencies": {
     "@buchanan-solutions/logkit": "workspace:*",

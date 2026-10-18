@@ -1,5 +1,5 @@
-import { Event } from "./event";
-import { Formatter } from "./formatter";
+import type { Event } from "./event";
+import type { Formatter } from "./formatter";
 
 /**
  * Transport for a logger
