@@ -17,7 +17,11 @@ The core package builds ESM, CommonJS, declarations and the `log` executable. MC
 
 ## Versioning and public npm
 
+**To publish locally again:** follow the [step-by-step terminal checklist](docs/npm-publishing.md#repeat-a-manual-release-from-your-terminal). It covers version preparation, checks, browser/2FA login and the short-lived publishing session, the six upload commands in order, verification and resuming a failed upload. It reads each package's version automatically. No Git push or CI setup is needed for this manual procedure.
+
 All six `@buchanan-solutions/logkit*` packages target `https://registry.npmjs.org` with public access. Consumers do not need a GitHub PAT. Remove any old scope mapping to GitHub Packages from consumer configuration.
+
+**Changesets owns release versions and changelogs for the TypeScript packages in `packages/`.** Add a changeset with each publishable change; select the affected packages and patch/minor/major bump. At release time, consume pending changesets and review their generated versions, changelogs and internal dependency updates. pnpm handles dependency installation; npm uploads the packed releases. Do not routinely hand-edit versions or use `npm version`.
 
 Changesets runs locally from the repository root:
 
@@ -28,7 +32,7 @@ pnpm install --lockfile-only
 pnpm check
 ```
 
-Review and commit versions, dependency updates, changelogs and the lockfile. Packages have independent versions. The prepared initial npm release is core `1.0.0` and the five adapters/MCP packages `1.0.0`.
+Review and commit versions, dependency updates, changelogs and the lockfile. Packages have independent versions. All six packages were published to public npm at `1.0.0` on 2026-10-18. Future releases need new versions only for packages being changed.
 
 See [the release runbook](docs/npm-publishing.md) for the first manual release and subsequent GitHub Actions Trusted Publishing setup. A safe artifact dry run after building is:
 

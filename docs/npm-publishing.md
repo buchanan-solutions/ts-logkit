@@ -2,13 +2,113 @@
 
 Checked against the repository and npm documentation on 2026-10-18.
 
+## Repeat a manual release from your terminal
+
+This is the local login-and-publish procedure Alex used on 2026-10-18. All six packages were successfully published at `1.0.0`; that release is complete. Manual publishing does not require a Git push, release tag, or GitHub Actions. Python/PyPI publishing is separate.
+
+### 1. Open the checkout and select the existing tools
+
+```bash
+cd /path/to/logkit
+source "$HOME/.nvm/nvm.sh"
+nvm use 24
+node --version
+npm --version
+pnpm --version
+```
+
+Use the pnpm version pinned in this checkout's `package.json` (currently `10.6.3`). The successful October 18 terminal used Node `24.22.0` and npm `11.19.1`. If the checkout moves, change only the `cd` path.
+
+### 2. Prepare new versions, unless already prepared and committed
+
+Use **Changesets for release versioning and changelogs for all six TypeScript packages under `packages/`**. Use pnpm to install/manage dependencies and npm to upload the packed releases. Do not use `npm version`, hand-edit release versions, or force every package to the same version as the routine release process.
+
+When a publishable change is ready, run `pnpm changeset`, select the affected packages, select patch/minor/major, and write a release note. Review and commit the generated `.changeset/*.md` file with the change. At release time, `pnpm run version` consumes pending changesets, updates package versions and changelogs, and adjusts internal dependency ranges as configured; then regenerate the lockfile. Review any dependent-package bumps. The packages are independently versioned (`fixed` and `linked` groups are empty), so they need not all advance together. Python packages are outside this Changesets workflow.
+
+For a new release, describe the changes and choose the appropriate patch/minor/major bumps:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm changeset
+pnpm exec changeset status
+pnpm run version
+pnpm install --lockfile-only
+```
+
+Review the manifests, changelogs, internal dependency updates and lockfile. Packages can have different versions. Do not rerun versioning when someone has already prepared the release; doing so was explicitly unnecessary for the October 18 `1.0.0` release. npm cannot overwrite an existing version. Unchanged packages can remain at their existing versions.
+
+### 3. Validate and commit the final release state
+
+```bash
+pnpm install --frozen-lockfile
+pnpm check
+```
+
+`pnpm check` runs lint, builds all packages, and runs tests. Stop on failure. If pnpm reports an unexpected fallback `.pnpm-store`, resolve store access before continuing; do not repeatedly retry a sandboxed install.
+
+Review and commit the intended source, versions, changelogs and lockfile before uploading. Review `git status --short` and stage the intended files explicitly. Record the release commit:
+
+```bash
+git status --short
+git log -1 --format='%h %s'
+```
+
+For each package you intend to publish, inspect its artifact without uploading. This example reads the core version from its manifest:
+
+```bash
+RELEASE_TAG="$(node -p "const p=require('./packages/logkit/package.json'); p.name.split('/')[1]+'@'+p.version")" node scripts/release.mjs --dry-run
+```
+
+Repeat for changed adapters by replacing `packages/logkit/package.json` with their package manifest path. Inspect the listed files, exports, types, executable and resolved dependency versions. The detailed artifact checks below explain what to inspect. Keep source and built outputs unchanged between validation and publication.
+
+### 4. Authenticate locally immediately before publishing
+
+```bash
+npm login --registry=https://registry.npmjs.org --auth-type=web
+npm whoami --registry=https://registry.npmjs.org
+```
+
+Open the URL printed by npm if a browser does not open automatically. Sign into the npm account with access to `buchanan-solutions`, complete the browser/2FA prompts, approve CLI access, and return to the terminal. During the October 18 release Alex reported receiving a two-hour publishing credential; use the expiry shown by npm rather than assuming every future login has the same duration. The expected account during that release was `alex_buchanan`.
+
+Keep credentials in npm's user configuration, never in this repository or chat. No token needs to be copied into a script. `npm whoami` confirms identity but does not prove publishing authorization: the first October 18 attempt passed `whoami` and still failed publication authentication. Refresh login and complete 2FA if that happens. Do not change a package version merely because authentication failed. See [npm login](https://docs.npmjs.com/cli/v11/commands/npm-login/) and [publishing with 2FA](https://docs.npmjs.com/requiring-2fa-for-package-publishing-and-settings-modification/).
+
+### 5. Publish one package at a time, in this order
+
+These are real public uploads. Run each line separately and wait for success before the next. Each command reads that package's committed version, so no remembered or manually substituted semver is needed:
+
+```bash
+RELEASE_TAG="$(node -p "const p=require('./packages/logkit/package.json'); p.name.split('/')[1]+'@'+p.version")" node scripts/release.mjs
+RELEASE_TAG="$(node -p "const p=require('./packages/logkit-otel/package.json'); p.name.split('/')[1]+'@'+p.version")" node scripts/release.mjs
+RELEASE_TAG="$(node -p "const p=require('./packages/logkit-redis/package.json'); p.name.split('/')[1]+'@'+p.version")" node scripts/release.mjs
+RELEASE_TAG="$(node -p "const p=require('./packages/logkit-fastify/package.json'); p.name.split('/')[1]+'@'+p.version")" node scripts/release.mjs
+RELEASE_TAG="$(node -p "const p=require('./packages/logkit-next/package.json'); p.name.split('/')[1]+'@'+p.version")" node scripts/release.mjs
+RELEASE_TAG="$(node -p "const p=require('./packages/logkit-mcp/package.json'); p.name.split('/')[1]+'@'+p.version")" node scripts/release.mjs
+```
+
+`RELEASE_TAG` here is an environment variable selecting a package/version; it does not create or push a Git tag. The script checks npm, skips an already-published version, packs with pnpm to resolve `workspace:` dependencies, and uploads that tarball with npm. Stop on any error. For an expired credential, repeat step 4 and retry only the failed command. Already-successful packages do not need another version bump or upload. If npm already contains a version but its contents are wrong, fix the source and release a new version.
+
+### 6. Verify public npm after the uploads
+
+```bash
+for package in logkit logkit-otel logkit-redis logkit-fastify logkit-next logkit-mcp; do
+  spec="$(node -p "const p=require('./packages/$package/package.json'); p.name+'@'+p.version")"
+  npm view "$spec" version dist.tarball --registry=https://registry.npmjs.org || break
+done
+```
+
+All six lookups should return the intended version and a public tarball URL. Stop and investigate any failed lookup. Record the versions and source commit. Git tags are optional release records for this manual path; pushing package tags can trigger the separate release workflow once that workflow is present remotely. Do not push tags merely to perform the local uploads above.
+
+## Background and CI setup
+
+The following sections retain the original preparation, artifact-inspection and optional CI instructions. Start with the checklist above for an ordinary manual release.
+
 ## Recommended approach
 
 Publish the first release manually from your machine. This establishes the npm packages and lets you verify account permissions, package contents and public installation directly. Then move subsequent releases to the existing tag-driven GitHub Actions workflow, using npm Trusted Publishing (OIDC) rather than a stored npm publishing token.
 
 Keep pnpm for installation, Changesets, checks, builds and packing. Use the npm CLI to upload the resulting tarballs. Publishing this way does not migrate the project away from pnpm.
 
-The repository is prepared for public npm: registries, CI publishing and Changesets versions are applied. No upload or release tag has been made. Python/PyPI releases are separate. Sections 2–3 explain the preparation for future releases; the first upload uses the versions below.
+The repository targets public npm. All six `1.0.0` packages were published manually on 2026-10-18. Local annotated package tags were added on 2026-10-19; they have not been pushed. The newer tag-driven workflow remains local until the release branch reaches remote main; npm trusted-publisher setup has not been verified. Python/PyPI releases are separate.
 
 ## What is being published
 
@@ -41,7 +141,7 @@ Complete browser/2FA prompts. Keep credentials in your user configuration, never
 
 ## 2. Prepare the repository for npmjs (already applied)
 
-Work in `/home/alex/git/core/deploy/.external/ts-logkit`. Before any release, review and commit these changes:
+Work in `/path/to/logkit`. Before any release, review and commit these changes:
 
 - Change `.npmrc`'s `@buchanan-solutions` registry mapping to `https://registry.npmjs.org`.
 - Change all six package manifests' `publishConfig.registry` to that URL; keep `publishConfig.access` as `public`.
@@ -54,7 +154,7 @@ Do not push release tags while the old workflow still targets GitHub Packages. A
 ### Apply and inspect versions (already applied for this release)
 
 ```bash
-cd /home/alex/git/core/deploy/.external/ts-logkit
+cd /path/to/logkit
 source "$HOME/.nvm/nvm.sh"
 nvm use 24
 pnpm install --frozen-lockfile
@@ -201,4 +301,4 @@ Stop after any failed command. Adding `--dry-run` packs and inspects without upl
 - All six real tarballs passed export/type/bin/license checks and `npm publish --dry-run`. Packed dependencies contain resolved versions rather than workspace/local pointers.
 - Release script guard cases passed with fake executables: invalid version tag, existing release, auth failure, packing failure, missing release and dry-run behavior. The final MCP release script also passed a real artifact dry run.
 - Read-only npm checks confirmed account `alex_buchanan` is an organization owner and all six prepared versions returned E404. This is a point-in-time check; publication still enforces registry permissions and version availability.
-- No package was uploaded, no tag was created and nothing was pushed. GitHub OIDC publication requires configuring the package trusted publishers after the initial manual release; it has not been exercised locally.
+- At the readiness checkpoint, nothing had been uploaded or pushed. Later that evening all six `1.0.0` packages were published manually. On 2026-10-19 their public versions and shipped files were verified, and six local annotated tags were created at `ceb1fc9`. Tags and the release branch remain unpushed. GitHub OIDC publication has not been verified.
